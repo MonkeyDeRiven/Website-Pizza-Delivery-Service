@@ -12,7 +12,7 @@
  * @package  Page Templates
  * @author   Bernhard Kreling, <bernhard.kreling@h-da.de>
  * @author   Ralf Hahn, <ralf.hahn@h-da.de>
- * @version  3.0
+ * @version  3.1
  */
 
 /**
@@ -82,16 +82,18 @@ abstract class Page
      * Takes care that all strings passed from outside
      * are converted to safe HTML by htmlspecialchars.
      *
-     * @param $title $title is the text to be used as title of the page
-	 * @return void
+     * @param string $title $title is the text to be used as title of the page
+     * @param string $jsFile path to a java script file to be included, default is "" i.e. no java script file
+     * @param bool $autoreload  true: auto reload the page every 5 s, false: not auto reload
+     * @return void
      */
-    protected function generatePageHeader(string $title = ""):void
+    protected function generatePageHeader(string $title = "", string $jsFile = "", bool $autoreload = false):void
     {
         $title = htmlspecialchars($title);
         header("Content-type: text/html; charset=UTF-8");
 
-        // to do: output common beginning of HTML code 
-        // including the individual title
+        // to do: handle all parameters
+        // to do: output common beginning of HTML code
     }
 
     /**

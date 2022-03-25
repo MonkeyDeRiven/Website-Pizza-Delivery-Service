@@ -22,15 +22,15 @@ For Linux install `docker-compose` separately: https://docs.docker.com/compose/i
 ## Initial Setup
 
 In the root folder `Docker`, where the `docker-compose.yml` file is located, edit the file called `env.txt` in order to assign a root password for your database as environment variable.
-Hint: The docker setup uses the ports 80 and 8085. Please make sure that these ports are not in use by any other software when starting the containers. 
+Hint: The docker setup uses the ports 80, 3306 and 8085. Please make sure that these ports are not in use by any other software when starting the containers. 
 
 ## Start the Containers
 
 Start your local docker containers in a console window with `docker-compose up -d`. 
-After a while (and a lot of messages - some colored in red) you should have 3 containers running:
+After a while (and a lot of messages) you should have 3 containers running:
 - php-apache: Containing Apache Webserver and PHP
 - MariaDB: your database server for SQL
-- PHPmyAdmin: web-based application to modify your database 
+- PHPmyAdmin a web-based application to modify your database 
 
 All files in the `src`-folder are linked into the apache-php container, so you can see your changes while developing in that folder. Furthermore this folder contains all examples and demos for the lecture. Everything is set up and deployed automatically.
 Note the folder `src\Log` containing the log files of the docker containers (e.g. apache log)
@@ -63,14 +63,12 @@ Hint: The files in the folder `Docker\mariadb.setup` are read when building the 
 
 ### Major Changes
 If you have changed your `env.txt` or if you want to start from scratch you have to delete and recreate volumes. Be aware that your data base entries will be lost!
-To do so stop the running containers `docker-compose down` and than delete the images with: 
-- `docker rmi --force mariadb`
-- `docker rmi --force phpmyadmin/phpmyadmin`
-- `docker rmi --force docker_php-apache` (Note: The name of this image may vary depending on your installation. Please check your existing images with `docker images` and delete the images you do not need anymore. )
+To do so stop the running containers `docker-compose down` and delete the images.
 
+Note: The name of this image may vary depending on your installation. Please check your existing images with `docker images` and delete the images you do not need anymore.
 
 ### Misc
-- There is a `Makefile` that includes several usefull shortcuts for docker. When you have `make`on your system you may call 
+- There is a `Makefile` that includes several usefull shortcuts for handling docker. When you have `make`on your system (otherwise you may at least read the commands from the file) you may call the following commands: 
    - `make start` to start the containers (instead of `docker-compose up -d`)
    - `make stop` to stop the containers
    - `make console` to open a shell in the apache docker container (You better know what you are doing? Really!?)
@@ -78,14 +76,14 @@ To do so stop the running containers `docker-compose down` and than delete the i
    - `make clean` to delete all containers (but not your src folder)
 
 - If you encounter strange errors when trying to build the containers (`Release file ... is not valid yet (invalid for another 11min 42s)`) on Windows systems this may happens due to wrong time settings in the container after standby. The easiest fix is to reboot the computer.
-- If the start of the container fails this may be due to ports that are already in use. The docker setup uses the ports 80 and 8085. Please make sure that these ports are not in use by any other software.
-- You will find the Apache Logfiles in the folder `Log` of your src folder. So you can easily access it from outside of the container.
+- If the start of the container fails this may be due to ports that are already in use. The docker setup uses the ports 80, 3306 and 8085. Please make sure that these ports are not in use by any other software.
+- You will find the Apache Logfiles in the folder `Log` of your src folder. So you can easily access the log from outside of the container.
 - There are well known attacks on computers using docker and containers. So here are some basic recommendations for security
   - Please make sure that your firewall is always up and running.
   - Start the containers only when you need it.
   
-# EWA XAMPP & Co. Setup
-If you can not run docker you have to setup the environment for EWA yourself. You need the same setup that is used for the EWA-lab . You will find some hints on the installation in the section "Technische Hinweise" of the current EWA lab. 
+# EWA using XAMPP & Co.
+If you can not run docker you have to setup the environment for EWA yourself. You need the same setup that is used for the EWA-lab. You will find some hints on the installation in the section "Technische Hinweise" of the current EWA lab. 
 
   Enjoy
-  Ralf Hahn, July 2021
+  Ralf Hahn, Feb 2022

@@ -348,6 +348,7 @@ INSERT INTO `zielflughafen` (`Zielflughafen`, `Land`) VALUES('Detroit', 'USA');
 INSERT INTO `zielflughafen` (`Zielflughafen`, `Land`) VALUES('Bangkok', 'Thailand');
 INSERT INTO `zielflughafen` (`Zielflughafen`, `Land`) VALUES('Washington DC', 'USA');
 INSERT INTO `zielflughafen` (`Zielflughafen`, `Land`) VALUES('New York', 'USA');
+INSERT INTO `zielflughafen` (`Zielflughafen`, `Land`) VALUES('Manchester', 'UK');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

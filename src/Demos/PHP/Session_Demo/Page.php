@@ -36,6 +36,8 @@ abstract class Page
      * by all operations of the class or inherited classes.
      */
     protected MySQLi $_database;
+    const SESSION_ROLE_KEY = 'role';
+    const ROLE_ADMIN = 'admin';
 
     // --- OPERATIONS ---
 
@@ -47,25 +49,8 @@ abstract class Page
     protected function __construct()
     {
         error_reporting(E_ALL);
-
-        $host = "localhost";
-        /********************************************/
-        // This code switches from the the local installation (XAMPP) to the docker installation 
-        if (gethostbyname('mariadb') != "mariadb") { // mariadb is known?
-            $host = "mariadb";
-        }
-        /********************************************/
-
-        $this->_database = new MySQLi($host, "public", "public", "2021_TeamSport"); //NOSONAR ignore hardcoded password
-
-        if (mysqli_connect_errno()) {
-            throw new Exception("Connect failed: " . mysqli_connect_error());
-        }
-
-        // set charset to UTF8!!
-        if (!$this->_database->set_charset("utf8")) {
-            throw new Exception($this->_database->error);
-        }
+        //@todo add database connection // NOSONAR ignore hint for students
+        // Attention: never store passwords as plain text in a db, use hashes only!!!
     }
 
     /**
@@ -73,7 +58,7 @@ abstract class Page
      */
     public function __destruct()
     {
-        $this->_database->close();
+
     }
 
     /**
@@ -83,46 +68,68 @@ abstract class Page
      * are converted to safe HTML by htmlspecialchars.
      *
      * @param $title $title is the text to be used as title of the page
-	 * @return void
+     * @return void
      */
-    protected function generatePageHeader(string $title = ""):void
+    protected function generatePageHeader(string $title = "", string $jsFile = "", bool $autoreload = false): void
     {
         $title = htmlspecialchars($title);
+        // define MIME type of response (*before* all HTML):
         header("Content-type: text/html; charset=UTF-8");
-
+        $js = ($jsFile === "") ? "" : "<script src='{$jsFile}'> </script>";
+        $refresh = ($autoreload) ? '<meta http-equiv="refresh" content="5" />' : "";
+        // output HTML header
         echo <<<EOT
 <!DOCTYPE html>
-<html lang="de">  
-  <head>
-    <meta charset="UTF-8" />
-	<title>$title</title>
-	<link rel="stylesheet" href="Exam21.css">
-    <script src="Exam21.js"> </script>
-  </head>
-EOT;
+<html lang="de">
+<head>
+	<meta charset="UTF-8"/>
+    <title>$title</title>
+    <link rel="stylesheet" href="style.css"/>
+    $js
+    $refresh
+</head>
+<body>
 
+EOT;
     }
 
     /**
      * Outputs the end of the HTML-file i.e. </body> etc.
-	 * @return void
+     * @return void
      */
-    protected function generatePageFooter():void
+    protected function generatePageFooter(): void
     {
-        echo "</html>";
+        echo "</body></html>";
     }
 
     /**
      * Processes the data that comes in via GET or POST.
      * If every derived page is supposed to do something common
-	 * with submitted data do it here. 
-	 * E.g. checking the settings of PHP that
+     * with submitted data do it here.
+     * E.g. checking the settings of PHP that
      * influence passing the parameters (e.g. magic_quotes).
-	 * @return void
+     * @return void
      */
-    protected function processReceivedData():void
+    protected function processReceivedData(): void
     {
 
+    }
+
+    protected function printSessionDebugInfo(): void
+    {
+        $sessionstatus = session_status();
+        $sessionid = session_id();
+        echo <<<HERE
+        <pre>
+        **Debug-Infos**
+        session_status(): $sessionstatus     (DISABLED = 0, NONE = 1, ACTIVE = 2)
+        session_id(): $sessionid
+        \$_SESSION:
+        HERE;
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            var_dump($_SESSION);
+        }
+        echo "</pre>";
     }
 } // end of class
 
