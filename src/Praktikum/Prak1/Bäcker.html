@@ -11,32 +11,35 @@
 <body>
   <section>
     <h1>Pizzabäcker (bestellte Pizzen)</h1>
-    <table style="text-align: center">
-      <tr>
-        <td></td>
-        <td>Bestellt</td>
-        <td>Im Ofen</td>
-        <td>Fertig</td>
-      </tr>
-      <tr>
-        <td>Salami</td>
-        <td><input type="radio" name="currentStatus1"/></td>
-        <td><input type="radio" name="currentStatus1"/></td>
-        <td><input type="radio" name="currentStatus1"/></td>
-      </tr>
-      <tr>
-        <td>Tonno</td>
-        <td><input type="radio" name="currentStatus2"/></td>
-        <td><input type="radio" name="currentStatus2"/></td>
-        <td><input type="radio" name="currentStatus2"/></td>
-      </tr>
-      <tr>
-        <td>Margherita</td>
-        <td><input type="radio" name="currentStatus3"/></td>
-        <td><input type="radio" name="currentStatus3s"/></td>
-        <td><input type="radio" name="currentStatus3"/></td>
-      </tr>
-    </table>
+    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="https://echo.fbi.h-da.de/">
+        <table style="text-align: center">
+          <tr>
+            <td></td>
+            <td>Bestellt</td>
+            <td>Im Ofen</td>
+            <td>Fertig</td>
+          </tr>
+          <tr>
+            <td>Salami</td>
+            <td><input type="radio" name="Salami1" value="bestellt" checked/></td>
+            <td><input type="radio" name="Salami1" value="im ofen" /></td>
+            <td><input type="radio" name="Salami1" value="fertig" /></td>
+          </tr>
+          <tr>
+            <td>Tonno</td>
+            <td><input type="radio" name="Tonno1" value="bestellt" checked /></td>
+            <td><input type="radio" name="Tonno1" value="im ofen" /></td>
+            <td><input type="radio" name="Tonno1" value="fertig" /></td>
+          </tr>
+          <tr>
+            <td>Margherita</td>
+            <td><input type="radio" name="Margherita1" value="bestellt" checked /></td>
+            <td><input type="radio" name="Margherita1" value="im ofen" /></td>
+            <td><input type="radio" name="Margherita1" value="fertig" /></td>
+          </tr>
+        </table>
+        <input type="submit" value="abschicken" />
+    </form>
   </section>
 </body>
 </html>
