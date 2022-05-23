@@ -60,15 +60,27 @@ class PageTemplate extends Page
     /**
      * Fetch all data that is necessary for later output.
      * Data is returned in an array e.g. as associative array.
-	 * @return array An array containing the requested data.
-	 * This may be a normal array, an empty array or an associative array.
+     * @return array An array containing the requested data.
+     * This may be a normal array, an empty array or an associative array.
+     * @throws Exception
      */
     protected function getViewData():array
     {
         // to do: fetch data for this view from the database
 		// to do: return array containing data
-        $placeholder = array();
-        return $placeholder;
+        $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
+                        . "From ordered_article join article "
+                        . "on article.article_id = ordered_article.article_id";
+        $RecordSet = $this->_database->query($sqlStatement);
+        if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+        $DataArray = array();
+        while($Record = $RecordSet->fetch_assoc()){
+            $DataArray[] = $Record["name"];
+            $DataArray[] = $Record["ordered_article_id"];
+            $DataArray[] = $Record["ordering_id"];
+            $DataArray[] = $Record["status"];
+        }
+        return $DataArray;
     }
 
     /**
@@ -81,7 +93,7 @@ class PageTemplate extends Page
      */
     protected function generateView():void
     {
-		$data = $this->getViewData();
+		$Data = $this->getViewData();
         $this->generatePageHeader('Bäcker'); //to do: set optional parameters
         //header("Content-type: text/html");
         $title = "Bäcker";
@@ -100,32 +112,54 @@ class PageTemplate extends Page
             <section>
                 <h1>Pizzabäcker (bestellte Pizzen)</h1>
                     <form name="fortschritte[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">
-                        <table style="text-align: center">
-                            <tr>
-                                <td></td>
-                                <td>Bestellt</td>
-                                <td>Im Ofen</td>
-                                <td>Fertig</td>
-                            </tr>
-                            <tr>
-                                <td>Salami</td>
-                                <td><input type="radio" name="Salami1" value="bestellt" checked/></td>
-                                <td><input type="radio" name="Salami1" value="im ofen" /></td>
-                                <td><input type="radio" name="Salami1" value="fertig" /></td>
-                            </tr>
-                            <tr>
-                                <td>Tonno</td>
-                                <td><input type="radio" name="Tonno1" value="bestellt" checked /></td>
-                                <td><input type="radio" name="Tonno1" value="im ofen" /></td>
-                                <td><input type="radio" name="Tonno1" value="fertig" /></td>
-                            </tr>
-                            <tr>
-                                <td>Margherita</td>
-                                <td><input type="radio" name="Margherita1" value="bestellt" checked /></td>
-                                <td><input type="radio" name="Margherita1" value="im ofen" /></td>
-                                <td><input type="radio" name="Margherita1" value="fertig" /></td>
-                            </tr>
-                        </table>
+                            <p>Bestellt/Im Ofen/Fertig</p>
+        EOT;
+                            for($i = 0; $i < count($Data); $i+=4){
+                                $PizzaName = $Data[$i];
+                                $OrderedArticleID = $Data[$i+1];
+                                $OrderingID = $Data[$i+2];
+                                $ProcessStatus = $Data[$i+3];
+                                echo <<< EOT2
+                                    <p>
+                                        {$PizzaName}{$OrderingID}
+                                EOT2;
+                                        if($ProcessStatus == "0"){
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="1" checked/>
+                                            EOT2;
+                                        }
+                                        else{
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="1"/>
+                                            EOT2;
+                                        }
+
+                                        if($ProcessStatus == "1"){
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="2" checked/>
+                                            EOT2;
+                                        }
+                                        else{
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="2" />
+                                            EOT2;
+                                        }
+
+                                        if($ProcessStatus >= 3){
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="3" checked />
+                                            EOT2;
+                                        }
+                                        else{
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="3" />
+                                            EOT2;
+                                        }
+                                        echo <<< EOT2
+                                        </p>
+                                        EOT2;
+                            }
+        echo <<< EOT
                         <input type="submit" value="abschicken" />
                         <input type="reset" value="löschen aller"/>
                     </form>
