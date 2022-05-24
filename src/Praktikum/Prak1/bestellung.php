@@ -130,7 +130,7 @@ class Bestellung extends Page
                 <section>
                 <h{$HCount}>Warenkorb</h{$HCount}>
                 </section>
-                <form accept-charset="UTF-8" method="post" action="https://echo.fbi.h-da.de" id="orderFormular">
+                <form accept-charset="UTF-8" method="post" action="bestellung.php" id="orderFormular">
                     <select name="Order:[]" id="order" multiple>
                         <option value="Salami">Pizza-Salami</option>
                         <option value="Vegetaria">Pizza-Vegetaria</option>
