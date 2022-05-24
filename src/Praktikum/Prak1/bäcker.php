@@ -30,7 +30,7 @@ require_once './Page.php';
  * @author   Bernhard Kreling, <bernhard.kreling@h-da.de>
  * @author   Ralf Hahn, <ralf.hahn@h-da.de>
  */
-class PageTemplate extends Page
+class Bäcker extends Page
 {
     // to do: declare reference variables for members
     // representing substructures/blocks
@@ -101,7 +101,7 @@ class PageTemplate extends Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
-                <meta charset="UTF-8" />
+                <meta charset="UTF-8" http-equiv="refresh" content="10" />
                 <!-- für später: CSS include -->
                 <!-- <link rel="stylesheet" href="XXX.css"/> -->
                 <!-- für später: JavaScript include -->
@@ -197,7 +197,7 @@ class PageTemplate extends Page
     public static function main():void
     {
         try {
-            $page = new PageTemplate();
+            $page = new Fahrer();
             $page->processReceivedData();
             $page->generateView();
         } catch (Exception $e) {
@@ -210,7 +210,7 @@ class PageTemplate extends Page
 
 // This call is starting the creation of the page.
 // That is input is processed and output is created.
-PageTemplate::main();
+Fahrer::main();
 
 // Zend standard does not like closing php-tag!
 // PHP doesn't require the closing tag (it is assumed when the file ends).
