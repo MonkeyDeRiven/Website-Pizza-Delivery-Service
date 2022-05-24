@@ -197,7 +197,7 @@ class Bäcker extends Page
     public static function main():void
     {
         try {
-            $page = new Fahrer();
+            $page = new Bäcker();
             $page->processReceivedData();
             $page->generateView();
         } catch (Exception $e) {
@@ -210,7 +210,7 @@ class Bäcker extends Page
 
 // This call is starting the creation of the page.
 // That is input is processed and output is created.
-Fahrer::main();
+Bäcker::main();
 
 // Zend standard does not like closing php-tag!
 // PHP doesn't require the closing tag (it is assumed when the file ends).
