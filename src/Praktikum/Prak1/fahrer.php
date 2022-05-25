@@ -68,9 +68,10 @@ class Fahrer extends Page
     {
         // to do: fetch data for this view from the database
         // to do: return array containing data
-        $sqlStatement = "SELECT ordering.address, ordering.ordering_id FROM ordering";
+        $sqlStatement = "SELECT ordering.address, ordering.ordering_id FROM ordering ORDER BY ordering.ordering_id ASC";
         $sqlStatement2 = "SELECT article.name, article.price, ordered_article.ordering_id, ordered_article.status"
-                       . "From article join ordered_article On ordered_article.article_id = article.article_id";
+                       . "From article join ordered_article On ordered_article.article_id = article.article_id"
+                       . "ORDER BY ordered_article.ordering_id ASC";
 ;
         $RecordSet = $this->_database->query($sqlStatement);
         $RecordSet2 = $this->_database->query($sqlStatement2);

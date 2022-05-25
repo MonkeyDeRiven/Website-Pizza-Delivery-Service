@@ -98,7 +98,7 @@ class Bestellung extends Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
-                <meta charset="UTF-8" http-equiv="refresh" content="10" />
+                <meta charset="UTF-8"/>
                 <!-- für später: CSS include -->
                 <!-- <link rel="stylesheet" href="XXX.css"/> -->
                 <!-- für später: JavaScript include -->
@@ -159,6 +159,17 @@ class Bestellung extends Page
     {
         parent::processReceivedData();
         // to do: call processReceivedData() for all members
+        if(isset($_POST)){
+            $Pizzas = $_POST["Order:"];
+            /*
+            for($i = 0; $i < count($Pizzas); $i++) {
+                echo <<< EOT
+                    <p>$Pizzas[$i]</p>
+                EOT;
+            }
+            */
+            header('Location: kunde.php'); die;
+        }
     }
 
     /**
