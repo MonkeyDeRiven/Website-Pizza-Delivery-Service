@@ -186,6 +186,7 @@ class Bäcker extends Page
 
 
         if(isset($_POST)) {
+            print_r($_POST);
             $totalOderSize = 0;
             $numOfOrderedArticle = 0;
 
@@ -240,11 +241,7 @@ class Bäcker extends Page
                 $countStatusDoneForID = $Record3["anzDone"];
 
                 if ($quantityOfArticles[$i] == $countStatusDoneForID) {
-                    $sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
-                    $this->_database->query($sqlDeleteOrder);
 
-                    $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $AllIDs[$i]";
-                    $this->_database->query($sqlDeleteArticles);
                 }
             }
 

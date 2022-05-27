@@ -208,11 +208,11 @@ class Bestellung extends Page
                     $value = 3;
 
                 $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, 1,1)";
-                echo($sqlStatement);
+
                 $this->_database->query($sqlStatement);
             }
 
-            header('Location: bestellung.php');
+            header('Location: kunde.php');
             die;
         }
 

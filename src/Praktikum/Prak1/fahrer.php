@@ -89,7 +89,7 @@ class Fahrer extends Page
             $quantityOfArticles[] = $Record2["anzOrder"];
         }
 
-
+        $articleId = array();
         $notDoneOrders = array();
         for ($i = 0; $i < $totalOderSize; $i++) {
             $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status = 3";
@@ -101,7 +101,6 @@ class Fahrer extends Page
             if ($quantityOfArticles[$i] != $countStatusDoneForID) {
                 $sqlArtId = "SELECT ordered_article.article_id FROM ordering JOIN ordered_article USING(ordering_id) where ordering.ordering_id = ordered_article.ordering_id and ordering_id = $AllIDs[$i]";
                 $sqlAdr = "SELECT address FROM ordering where ordering_id = $AllIDs[$i]";
-                $articleId = array();
                 $articleString = " ";
                 $anzArticle = 0;
 
@@ -111,13 +110,19 @@ class Fahrer extends Page
                         $articleId = $Record5["article_id"];
                         $anzArticle++;
                 }
+                for($m = 0; $m<$anzArticle; $m++){
+                    echo ("\n$articleId[$m]");
+                    
+                }
+
+
                 for($j = 0; $j<$anzArticle; $j++){
                     if($articleId[$j] == "1")
-                        $articleString = "$articleString , Pizza-Salami";
+                        $articleString = "$articleString, Pizza-Salami";
                     if($articleId[$j] == "2")
-                        $articleString = "$articleString , Pizza-Vegetaria";
+                        $articleString = "$articleString, Pizza-Vegetaria";
                     if($articleId[$j] == "3")
-                        $articleString = "$articleString , Pizza-Spinat-Hühnchen";
+                        $articleString = "$articleString, Pizza-Spinat-Hühnchen";
                 }
 
                 $RecordSet6 = $this->_database->query($sqlAdr);
@@ -129,15 +134,11 @@ class Fahrer extends Page
             }
         }
 
-
         /*$sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
         $this->_database->query($sqlDeleteOrder);
 
         $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $AllIDs[$i]";
         $this->_database->query($sqlDeleteArticles);*/
-
-
-
 
     return $notDoneOrders;
     }
