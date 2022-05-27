@@ -162,7 +162,7 @@ class Fahrer extends Page
     {
 
         $Data = $this->getViewData();
-        $this->generatePageHeader('Fahrer'); //to do: set optional parameters
+       // $this->generatePageHeader('Fahrer'); //to do: set optional parameters
 
         header("Content-type:text/html");
 
@@ -196,26 +196,26 @@ class Fahrer extends Page
                 EOT;
 
             if($orderStatus == "2"){echo <<< EOT
-                <input type="radio"  name="$orderID$orderStatus" value="2" checked/>
+                <input type="radio"  name="$orderID$orderStatus" value="$orderID,2," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus"" value="2"/>
+                <input type="radio" name="$orderID$orderStatus" value="$orderID,2,"/>
             EOT;
             }
 
             if($orderStatus == "3"){ echo <<< EOT
-                 <input type="radio"  name="$orderID$orderStatus"" value="3" checked/>
+                 <input type="radio"  name="$orderID$orderStatus" value="$orderID,3," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus"" value="3"/>
+                <input type="radio" name="$orderID$orderStatus" value="$orderID,3,"/>
             EOT;
             }
 
             if($orderStatus == "4"){ echo <<< EOT
-                 <input type="radio"  name="$orderID$orderStatus"" value="4" checked/>
+                 <input type="radio"  name="$orderID$orderStatus" value="$orderID,4," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus" value="4"/>
+                <input type="radio" name="$orderID$orderStatus" value="$orderID,4,"/>
             EOT;
             }
         }
@@ -243,6 +243,36 @@ EOT;
     protected function processReceivedData():void
     {
         parent::processReceivedData();
+
+        if(isset($_POST["checkInput"])){
+            $allStatFromPost = "";
+            $counter = 0;
+            foreach($_POST as $key => $value){
+                if($value != "checkInput") {
+                    $allStatFromPost = "$allStatFromPost$value";
+                    $counter++;
+                }
+            }
+            //Nice to know ->String Splitter in Php, explode()
+            $data = explode(",",$allStatFromPost);//Splits into array with deli and given string
+            $counter = 0;
+            for($i = 0; $i<count($data)-1; $i = $i + 2){
+                $orderID = data[$i];//Why the fuck werden daraus Buchstaben??????Scheiß autoType man
+                $orderStatus = data[$i+1];
+                $counter = $i + 1;
+                if($data[$i+1] < "4"){
+                    $sqlUpdateArticleStatus = "UPDATE ordered_article SET status = $data[$counter] WHERE ordering_id = $data[$i]";
+                    $this->_database->query($sqlUpdateArticleStatus);
+                    echo($sqlUpdateArticleStatus);
+                }else{
+                    $sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $data[$i]";
+                    $this->_database->query($sqlDeleteOrder);
+
+                    $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $data[$i]";
+                    $this->_database->query($sqlDeleteArticles);
+                }
+            }
+        }
         // to do: call processReceivedData() for all members
     }
 
