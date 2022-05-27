@@ -69,6 +69,8 @@ class Bestellung extends Page
         // to do: fetch data for this view from the database
         // to do: return array containing data
         $sqlStatement = "SELECT article.picture, article.name, article.price FROM article";
+
+
         $RecordSet = $this->_database->query($sqlStatement);
         if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
         $DataArray = array();
@@ -91,9 +93,9 @@ class Bestellung extends Page
     protected function generateView():void
     {
         $Data = $this->getViewData();
-        $this->generatePageHeader('Bäcker'); //to do: set optional parameters
+        $this->generatePageHeader('Bestellung'); //to do: set optional parameters
         //header("Content-type: text/html");
-        $title = "Bäcker";
+        $title = "Bestellung";
         echo <<< EOT
         <!DOCTYPE html>
         <html lang="de">
@@ -103,7 +105,7 @@ class Bestellung extends Page
                 <!-- <link rel="stylesheet" href="XXX.css"/> -->
                 <!-- für später: JavaScript include -->
                 <!-- <script src="XXX.js"></script> -->
-                <title>Pizzabäcker</title>
+                <title>Bestellung</title>
             </head>
             <body>
             <section>
@@ -131,13 +133,13 @@ class Bestellung extends Page
                 <h{$HCount}>Warenkorb</h{$HCount}>
                 </section>
                 <form accept-charset="UTF-8" method="post" action="bestellung.php" id="orderFormular">
-                    <select name="Order:[]" id="order" multiple>
+                    <select name="Order[]" id="order" multiple>
                         <option value="Salami">Pizza-Salami</option>
                         <option value="Vegetaria">Pizza-Vegetaria</option>
                         <option value="Spinat-Hühnchen">Pizza-Spinat-Hühnchen</option>
                     </select>
                     <p>Gesamtpreis: 0.00€</p>
-                    <input name="Adresse" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required>
+                    <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required>
                     <button type="submit">bestellen</button>
                     <button type="reset">löschen</button>
                 </form>
@@ -155,21 +157,65 @@ class Bestellung extends Page
      * data do it here.
      * @return void
      */
+    protected function getPizzaId($pizzaName){
+        $value = 0;
+        if($pizzaName == "Salami")
+            $value = 1;
+        if($pizzaName == "Vegetaria")
+            $value = 2;
+        if($pizzaName == "Spinat-Hühnchen")
+            $value = 3;
+
+        return $value;
+    }
     protected function processReceivedData():void
     {
         parent::processReceivedData();
+
+
         // to do: call processReceivedData() for all members
-        if(isset($_POST)){
-            $Pizzas = $_POST["Order:"];
-            /*
-            for($i = 0; $i < count($Pizzas); $i++) {
-                echo <<< EOT
-                    <p>$Pizzas[$i]</p>
-                EOT;
+        if (isset($_POST["Address"])){
+            $addr = $_POST["Address"];
+            $timestamp = date('Y-m-d H:i:s');
+
+            $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
+            echo($sqlStatement);
+            $this->_database->query($sqlStatement);
+
+            $orderedPizzas = array();
+            $numberOfOrderedPizzas = count($_POST["Order"]);
+
+            for ($i = 0; $i <$numberOfOrderedPizzas; $i++) {
+                    $orderedPizzas[] = $_POST["Order"];
             }
-            */
-            header('Location: kunde.php'); die;
+
+            $sqlStatementSel = "SELECT ordering_id from ordering where ordering_time = '$timestamp'";
+            $orderId = 0;
+            $RecordSet = $this->_database->query($sqlStatementSel);
+            if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+
+            while($Record = $RecordSet->fetch_assoc()) {
+                $orderId = $Record["ordering_id"];
+            }
+
+            for($i = 0; $i<$numberOfOrderedPizzas; $i++) {
+                $value = 0;
+                if($orderedPizzas[$i] == "Salami[1]")
+                    $value = 1;
+                if($orderedPizzas[$i] == "Vegetaria[2]")
+                    $value = 2;
+                if($orderedPizzas[$i] == "Spinat-Hühnchen")
+                    $value = 3;
+
+                $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, 1,1)";
+
+                $this->_database->query($sqlStatement);
+            }
+
+            header('Location: kunde.php');
+            die;
         }
+
     }
 
     /**
@@ -189,6 +235,7 @@ class Bestellung extends Page
             $page = new Bestellung();
             $page->processReceivedData();
             $page->generateView();
+            print_r($_POST);
         } catch (Exception $e) {
             //header("Content-type: text/plain; charset=UTF-8");
             //header("Content-type: text/html; charset=UTF-8");
