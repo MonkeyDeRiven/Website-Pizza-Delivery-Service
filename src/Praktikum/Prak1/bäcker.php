@@ -149,7 +149,6 @@ class Bäcker extends Page
                                                 <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0"/>
                                             EOT2;
                                         }
-
                                         if($ProcessStatus == "1"){
                                             echo <<< EOT2
                                                 <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="1" checked/>
@@ -160,7 +159,6 @@ class Bäcker extends Page
                                                 <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="1" />
                                             EOT2;
                                         }
-
                                         if($ProcessStatus >= "2"){
                                             echo <<< EOT2
                                                 <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" checked />

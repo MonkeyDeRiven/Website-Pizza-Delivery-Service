@@ -91,8 +91,10 @@ class Fahrer extends Page
 
         $articleId = array();
         $notDoneOrders = array();
+        $statusFromOrder = array();
+        $counter = 0;
         for ($i = 0; $i < $totalOderSize; $i++) {
-            $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status > 2";
+            $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status > 1";
             $RecordSet3 = $this->_database->query($sqlCountStatusDone);
             if (!$RecordSet3) throw new Exception("Error in sqlStatement: " . $this->_database->error);
             $Record3 = $RecordSet3->fetch_assoc();
@@ -110,10 +112,6 @@ class Fahrer extends Page
                         $articleId = $Record5["article_id"];
                         $anzArticle++;
                 }
-                for($m = 0; $m<$anzArticle; $m++){
-                    echo ("\n$articleId[$m]");
-                    
-                }
 
                 for($j = 0; $j<$anzArticle; $j++){
                     if($articleId[$j] == "1")
@@ -128,16 +126,20 @@ class Fahrer extends Page
                 if (!$RecordSet6) throw new Exception("Error in sqlStatement: " . $this->_database->error);
                 $Record6 = $RecordSet6->fetch_assoc();
                 $tmpString = $Record6["address"];
-                echo("$tmpString $articleString");
                 $notDoneOrders[] = "$tmpString, $articleString";
 
-                $RecordSet7 = $this->_database->query("SELECT status FROM ordered_articles WHERE ordering_id = $AllIDs[$i]");
+                $RecordSet7 = $this->_database->query("SELECT DISTINCT status FROM ordered_article WHERE ordering_id = $AllIDs[$i]");
                 if (!$RecordSet7) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-                $Record7 = $RecordSet7->fetch_assoc();
-                $orderStatus = $Record7["status"];
 
+                while($Record7 = $RecordSet7->fetch_assoc()){
+                    $statusFromOrder[] = $Record7["status"];
+                }
+                $notDoneOrders[] = $statusFromOrder[$counter];
+                $notDoneOrders[] = $AllIDs[$i];
+                $counter++;
             }
         }
+
 
         /*$sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
         $this->_database->query($sqlDeleteOrder);
@@ -158,13 +160,12 @@ class Fahrer extends Page
      */
     protected function generateView():void
     {
+
         $Data = $this->getViewData();
         $this->generatePageHeader('Fahrer'); //to do: set optional parameters
 
         header("Content-type:text/html");
-        $title = "Fahrer";
-        $bestellungen[] = "Schulz, Kasinostraße 5, 15,50€\nPizza-Hawaii, Pizza-Salami ";
-        $labelForRdBtn = "fertig\t unterwegs\t geliefert";
+
 
         echo <<< EOT
         <!DOCTYPE html>
@@ -175,18 +176,57 @@ class Fahrer extends Page
                 <!-- <link rel="stylesheet" href="XXX.css"/> -->
                 <!-- für später: JavaScript include -->
                 <!-- <script src="XXX.js"></script> -->
-                <title>Kunde</title>
+                <title>Fahrer</title>
             </head>
-            <body>
-                <section>
-                <form name="bestellstatus[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">                    <h1>Fahrer(auslieferbarer Bestellungen)</h1>
-                    <b>$bestellungen[0]</b><br></br>
-                    $labelForRdBtn<br></br>
-                    <input type="radio" id="fertig" name="status" value="3" hspace="10">
-                    <input type="radio" id="unterwegs" name="status" value="4" hspace="10">
-                    <input type="radio" id="geliefert" name="status" value="5" hspace="10">                  
-                </form>
-                </section> 
+         <body>
+            <section>
+                <h1>Fahrer (auslieferbare Bestellungen)</h1>
+                    <form name="lieferstatus[]" accept-charset="UTF-8" method="post" action="fahrer.php">
+                            
+                           <p><b> Bestellt\n   Im Ofen  \n Fertig</b></p>
+
+        EOT;
+        for($i = 0; $i<count($Data); $i = $i+3){
+            $orderDisplay = $Data[$i];
+            $orderStatus = $Data[$i+1];
+            $orderID = $Data[$i+2];
+
+            echo <<< EOT
+                <p><b>$orderDisplay</b></p>
+                EOT;
+
+            if($orderStatus == "2"){echo <<< EOT
+                <input type="radio"  name="$orderID$orderStatus" value="2" checked/>
+            EOT;
+            }else{ echo <<< EOT
+                <input type="radio" name="$orderID$orderStatus"" value="2"/>
+            EOT;
+            }
+
+            if($orderStatus == "3"){ echo <<< EOT
+                 <input type="radio"  name="$orderID$orderStatus"" value="3" checked/>
+            EOT;
+            }else{ echo <<< EOT
+                <input type="radio" name="$orderID$orderStatus"" value="3"/>
+            EOT;
+            }
+
+            if($orderStatus == "4"){ echo <<< EOT
+                 <input type="radio"  name="$orderID$orderStatus"" value="4" checked/>
+            EOT;
+            }else{ echo <<< EOT
+                <input type="radio" name="$orderID$orderStatus" value="4"/>
+            EOT;
+            }
+        }
+
+        echo <<< EOT
+                        <p></p>
+                        <input name="checkInput" value="true" hidden /> 
+                        <input type="submit" value="abschicken" />
+                        <input type="reset" value="löschen" />
+                    </form>
+                </section>
             </body>
         </html>
 EOT;
@@ -221,9 +261,9 @@ EOT;
     {
         try {
             $page = new Fahrer();
-            $page->getViewData();
             $page->processReceivedData();
             $page->generateView();
+
         } catch (Exception $e) {
             //header("Content-type: text/plain; charset=UTF-8");
             //header("Content-type: text/html; charset=UTF-8");
