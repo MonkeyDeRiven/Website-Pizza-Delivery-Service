@@ -73,10 +73,12 @@ class Bäcker extends Page
 		// to do: return array containing data
         $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
                         . "From ordered_article join article "
-                        . "on article.article_id = ordered_article.article_id";
+                        . "on article.article_id = ordered_article.article_id "
+                        . "Where status < 2";
+
         $RecordSet = $this->_database->query($sqlStatement);
         if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-        $DataArray = array();
+        $DataArray = array();;
         while($Record = $RecordSet->fetch_assoc()){
             $DataArray[] = $Record["name"];
             $DataArray[] = $Record["ordered_article_id"];
@@ -84,6 +86,17 @@ class Bäcker extends Page
             $DataArray[] = $Record["status"];
         }
         return $DataArray;
+    }
+
+    private function deleteFinishedOrders(array $orderList){
+        $orderStartIndex = 0;
+        $orderEndIndex = 0;
+        $isOrderDone = true;
+        for($i = 1; $i < count($orderList)-1; $i++){
+            if($orderList[$i] != $orderList[$i-1]){
+
+            }
+        }
     }
 
     /**
@@ -114,7 +127,7 @@ class Bäcker extends Page
         <body>
             <section>
                 <h1>Pizzabäcker (bestellte Pizzen)</h1>
-                    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="bäcker.php/">
+                    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="bäcker.php">
                             <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
                             for($i = 0; $i < count($Data); $i+=4){
@@ -126,50 +139,52 @@ class Bäcker extends Page
                                     <p>
                                         {$PizzaName}{$OrderingID}
                                 EOT2;
+                                        if($ProcessStatus == "0"){
+                                            echo <<< EOT2
+                                                <input type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0" checked/>
+                                            EOT2;
+                                        }
+                                        else{
+                                            echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0"/>
+                                            EOT2;
+                                        }
+
                                         if($ProcessStatus == "1"){
                                             echo <<< EOT2
-                                                <input type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="1" checked/>
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="1" checked/>
                                             EOT2;
                                         }
                                         else{
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="1"/>
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="1" />
                                             EOT2;
                                         }
 
-                                        if($ProcessStatus == "2"){
+                                        if($ProcessStatus >= "2"){
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" checked/>
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" checked />
                                             EOT2;
                                         }
                                         else{
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" />
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" />
                                             EOT2;
                                         }
 
-                                        if($ProcessStatus >= 3){
-                                            echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="3" checked />
-                                            EOT2;
-                                        }
-                                        else{
-                                            echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="3" />
-                                            EOT2;
-                                        }
                                         echo <<< EOT2
                                         </p>
                                         EOT2;
                             }
         echo <<< EOT
+                        <input name="checkInput" value="true" hidden /> 
                         <input type="submit" value="abschicken" />
-                        <input type="reset" value="löschen aller"/>
+                        <input type="reset" value="löschen aller" />
                     </form>
                 </section>
             </body>
         </html>
-    EOT;
+        EOT;
 
         $this->generatePageFooter();
     }
@@ -184,9 +199,7 @@ class Bäcker extends Page
     {
         parent::processReceivedData();
 
-
-        if(isset($_POST)) {
-            print_r($_POST);
+        if(isset($_POST["checkInput"])) {
             $totalOderSize = 0;
             $numOfOrderedArticle = 0;
 
@@ -194,7 +207,7 @@ class Bäcker extends Page
             //Statusänderung
             $orderedArticleID = array();
             $orderedArticleStatus = array();
-            $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article";
+            $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article Where status < 2";
             $RecordSet4 = $this->_database->query($sqlGetOrdArtID);
             if (!$RecordSet4) throw new Exception("Error in sqlStatement: " . $this->_database->error);
             while ($Record4 = $RecordSet4->fetch_assoc()) {
@@ -205,7 +218,9 @@ class Bäcker extends Page
 
             $allStatFromPost = array();
             foreach($_POST as $key => $value){
-                $allStatFromPost[] = $value;
+                if($value != "checkInput") {
+                    $allStatFromPost[] = $value;
+                }
             }
 
             for($i = 0; $i<$numOfOrderedArticle; $i++) {
@@ -213,8 +228,8 @@ class Bäcker extends Page
                 $this->_database->query($sqlUpdateAllStat);
             }
 
-
-            //Statusabfrage und Datenlöschung
+/*
+ * //Statusabfrage und Datenlöschung
             $sqlGetAllIds = "SELECT ordering_id FROM ordering";
             $RecordSet = $this->_database->query($sqlGetAllIds);
             if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
@@ -243,8 +258,10 @@ class Bäcker extends Page
                 if ($quantityOfArticles[$i] == $countStatusDoneForID) {
 
                 }
-            }
+            }*/
 
+            header('Location: bäcker.php');
+            die();
         }
         // to do: call processReceivedData() for all members
     }
