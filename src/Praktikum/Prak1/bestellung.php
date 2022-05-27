@@ -207,7 +207,7 @@ class Bestellung extends Page
                 if($orderedPizzas[$i] == "Spinat-Hühnchen")
                     $value = 3;
 
-                $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, 1,1)";
+                $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, 1,0)";
 
                 $this->_database->query($sqlStatement);
             }

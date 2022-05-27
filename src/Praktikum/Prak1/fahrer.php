@@ -92,7 +92,7 @@ class Fahrer extends Page
         $articleId = array();
         $notDoneOrders = array();
         for ($i = 0; $i < $totalOderSize; $i++) {
-            $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status = 3";
+            $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status > 2";
             $RecordSet3 = $this->_database->query($sqlCountStatusDone);
             if (!$RecordSet3) throw new Exception("Error in sqlStatement: " . $this->_database->error);
             $Record3 = $RecordSet3->fetch_assoc();
