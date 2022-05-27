@@ -178,38 +178,41 @@ class Bestellung extends Page
             $addr = $_POST["Address"];
             $timestamp = date('Y-m-d H:i:s');
 
-            $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
-            echo($sqlStatement);
-            $this->_database->query($sqlStatement);
+            try {
 
-            $orderedPizzas = array();
-            $numberOfOrderedPizzas = count($_POST["Order"]);
-
-            for ($i = 0; $i <$numberOfOrderedPizzas; $i++) {
-                    $orderedPizzas[] = $_POST["Order"];
-            }
-
-            $sqlStatementSel = "SELECT ordering_id from ordering where ordering_time = '$timestamp'";
-            $orderId = 0;
-            $RecordSet = $this->_database->query($sqlStatementSel);
-            if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-
-            while($Record = $RecordSet->fetch_assoc()) {
-                $orderId = $Record["ordering_id"];
-            }
-
-            for($i = 0; $i<$numberOfOrderedPizzas; $i++) {
-                $value = 0;
-                if($orderedPizzas[$i] == "Salami[1]")
-                    $value = 1;
-                if($orderedPizzas[$i] == "Vegetaria[2]")
-                    $value = 2;
-                if($orderedPizzas[$i] == "Spinat-Hühnchen")
-                    $value = 3;
-
-                $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, 1,0)";
-
+                $this->_database->begin_transaction();
+                $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
                 $this->_database->query($sqlStatement);
+
+                $numberOfOrderedPizzas = count($_POST["Order"]);
+                $orderedPizzas = $_POST["Order"];
+
+                $sqlStatementSel = "SELECT ordering_id from ordering where ordering_time = '$timestamp'";
+                $orderId = 0;
+                $RecordSet = $this->_database->query($sqlStatementSel);
+                if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+
+                while ($Record = $RecordSet->fetch_assoc()) {
+                    $orderId = $Record["ordering_id"];
+                }
+
+                $sqlStatementPizzaWithId = "Select name, article_id From article";
+                $RecordSet = $this->_database->query($sqlStatementPizzaWithId);
+
+                $pizzaIdList = array();
+                while ($Record = $RecordSet->fetch_assoc()) {
+                    $pizzaIdList[$Record["name"]] = $Record["article_id"];
+                }
+
+                for ($i = 0; $i < $numberOfOrderedPizzas; $i++) {
+                    $articleId = $pizzaIdList[$orderedPizzas[$i]];
+                    $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, $articleId,0)";
+
+                    $this->_database->query($sqlStatement);
+                }
+                $this->_database->commit();
+            }catch(Exception $e){
+                $this->_database->rollback();
             }
 
             header('Location: kunde.php');
