@@ -98,8 +98,8 @@ class Fahrer extends Page
             $Record3 = $RecordSet3->fetch_assoc();
             $countStatusDoneForID = $Record3["anzDone"];
 
-            if ($quantityOfArticles[$i] != $countStatusDoneForID) {
-                $sqlArtId = "SELECT ordered_article.article_id FROM ordering JOIN ordered_article USING(ordering_id) where ordering.ordering_id = ordered_article.ordering_id and ordering_id = $AllIDs[$i]";
+            if ($quantityOfArticles[$i] == $countStatusDoneForID) {
+                $sqlArtId = "SELECT ordered_article.article_id FROM ordering JOIN ordered_article USING(ordering_id) WHERE ordering_id = $AllIDs[$i]";
                 $sqlAdr = "SELECT address FROM ordering where ordering_id = $AllIDs[$i]";
                 $articleString = " ";
                 $anzArticle = 0;
@@ -114,7 +114,6 @@ class Fahrer extends Page
                     echo ("\n$articleId[$m]");
                     
                 }
-
 
                 for($j = 0; $j<$anzArticle; $j++){
                     if($articleId[$j] == "1")
@@ -131,6 +130,12 @@ class Fahrer extends Page
                 $tmpString = $Record6["address"];
                 echo("$tmpString $articleString");
                 $notDoneOrders[] = "$tmpString, $articleString";
+
+                $RecordSet7 = $this->_database->query("SELECT status FROM ordered_articles WHERE ordering_id = $AllIDs[$i]");
+                if (!$RecordSet7) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+                $Record7 = $RecordSet7->fetch_assoc();
+                $orderStatus = $Record7["status"];
+
             }
         }
 
@@ -156,6 +161,35 @@ class Fahrer extends Page
         $Data = $this->getViewData();
         $this->generatePageHeader('Fahrer'); //to do: set optional parameters
 
+        header("Content-type:text/html");
+        $title = "Fahrer";
+        $bestellungen[] = "Schulz, Kasinostraße 5, 15,50€\nPizza-Hawaii, Pizza-Salami ";
+        $labelForRdBtn = "fertig\t unterwegs\t geliefert";
+
+        echo <<< EOT
+        <!DOCTYPE html>
+        <html lang="de" xmlns="http://www.w3.org/1999/html">
+            <head>
+                <meta charset="UTF-8" />
+                <!-- für später: CSS include -->
+                <!-- <link rel="stylesheet" href="XXX.css"/> -->
+                <!-- für später: JavaScript include -->
+                <!-- <script src="XXX.js"></script> -->
+                <title>Kunde</title>
+            </head>
+            <body>
+                <section>
+                <form name="bestellstatus[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">                    <h1>Fahrer(auslieferbarer Bestellungen)</h1>
+                    <b>$bestellungen[0]</b><br></br>
+                    $labelForRdBtn<br></br>
+                    <input type="radio" id="fertig" name="status" value="3" hspace="10">
+                    <input type="radio" id="unterwegs" name="status" value="4" hspace="10">
+                    <input type="radio" id="geliefert" name="status" value="5" hspace="10">                  
+                </form>
+                </section> 
+            </body>
+        </html>
+EOT;
 
         $this->generatePageFooter();
     }
@@ -187,6 +221,7 @@ class Fahrer extends Page
     {
         try {
             $page = new Fahrer();
+            $page->getViewData();
             $page->processReceivedData();
             $page->generateView();
         } catch (Exception $e) {
@@ -206,38 +241,4 @@ Fahrer::main();
 // Not specifying the closing ? >  helps to prevent accidents
 // like additional whitespace which will cause session
 // initialization to fail ("headers already
-?>
-
-
-<?php
-    header("Content-type:text/html");
-    $title = "Fahrer";
-    $bestellungen[] = "Schulz, Kasinostraße 5, 15,50€\nPizza-Hawaii, Pizza-Salami ";
-    $labelForRdBtn = "fertig\t unterwegs\t geliefert";
-
-echo <<< EOT
-        <!DOCTYPE html>
-        <html lang="de" xmlns="http://www.w3.org/1999/html">
-            <head>
-                <meta charset="UTF-8" />
-                <!-- für später: CSS include -->
-                <!-- <link rel="stylesheet" href="XXX.css"/> -->
-                <!-- für später: JavaScript include -->
-                <!-- <script src="XXX.js"></script> -->
-                <title>Kunde</title>
-            </head>
-            <body>
-                <section>
-                <form name="bestellstatus[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">                    <h1>Fahrer(auslieferbarer Bestellungen)</h1>
-                    <b>$bestellungen[0]</b><br></br>
-                    $labelForRdBtn<br></br>
-                    <input type="radio" id="fertig" name="status" value="3" hspace="10">
-                    <input type="radio" id="unterwegs" name="status" value="4" hspace="10">
-                    <input type="radio" id="geliefert" name="status" value="5" hspace="10">                  
-                </form>
-                </section> 
-            </body>
-        </html>
-EOT;
-
 ?>
