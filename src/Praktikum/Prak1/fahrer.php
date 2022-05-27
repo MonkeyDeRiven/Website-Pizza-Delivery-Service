@@ -109,17 +109,21 @@ class Fahrer extends Page
                 $RecordSet5 = $this->_database->query($sqlArtId);
                 if (!$RecordSet5) throw new Exception("Error in sqlStatement: " . $this->_database->error);
                 while($Record5 = $RecordSet5->fetch_assoc()){
-                        $articleId = $Record5["article_id"];
+                        $articleId[] = $Record5["article_id"];
                         $anzArticle++;
                 }
 
+                $sqlStatementPizzaWithId = "Select article_id, name From article";
+                $RecordSet = $this->_database->query($sqlStatementPizzaWithId);
+                $pizzaList = array();
+                $pizzaString = "Pizza-";
+                while($Record = $RecordSet->fetch_assoc()){
+                    $pizzaList[$Record["article_id"]] = "$pizzaString" . $Record["name"];
+                }
+
                 for($j = 0; $j<$anzArticle; $j++){
-                    if($articleId[$j] == "1")
-                        $articleString = "$articleString, Pizza-Salami";
-                    if($articleId[$j] == "2")
-                        $articleString = "$articleString, Pizza-Vegetaria";
-                    if($articleId[$j] == "3")
-                        $articleString = "$articleString, Pizza-Spinat-Hühnchen";
+                    $pizzaName = $pizzaList[$articleId[$j]];
+                    $articleString = "$articleString, $pizzaName";
                 }
 
                 $RecordSet6 = $this->_database->query($sqlAdr);
