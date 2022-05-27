@@ -201,7 +201,6 @@ class Bäcker extends Page
             $totalOderSize = 0;
             $numOfOrderedArticle = 0;
 
-
             //Statusänderung
             $orderedArticleID = array();
             $orderedArticleStatus = array();
@@ -225,39 +224,6 @@ class Bäcker extends Page
                 $sqlUpdateAllStat = "UPDATE ordered_article SET status = $allStatFromPost[$i] where ordered_article_id = $orderedArticleID[$i]";
                 $this->_database->query($sqlUpdateAllStat);
             }
-
-/*
- * //Statusabfrage und Datenlöschung
-            $sqlGetAllIds = "SELECT ordering_id FROM ordering";
-            $RecordSet = $this->_database->query($sqlGetAllIds);
-            if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-            $AllIDs = array();
-            while ($Record = $RecordSet->fetch_assoc()) {
-                $AllIDs[] = $Record["ordering_id"];
-                $totalOderSize++;
-            }
-
-            $quantityOfArticles = array();
-            for ($i = 0; $i < $totalOderSize; $i++) {
-                $sqlCountArticlesForEach = "SELECT count(ordering_id) as anzOrder FROM ordering JOIN ordered_article using (ordering_id) where ordering_id = $AllIDs[$i]";
-                $RecordSet2 = $this->_database->query($sqlCountArticlesForEach);
-                if (!$RecordSet2) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-                $Record2 = $RecordSet2->fetch_assoc();
-                $quantityOfArticles[] = $Record2["anzOrder"];
-            }
-
-            for ($i = 0; $i < $totalOderSize; $i++) {
-                $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status = 3";
-                $RecordSet3 = $this->_database->query($sqlCountStatusDone);
-                if (!$RecordSet3) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-                $Record3 = $RecordSet3->fetch_assoc();
-                $countStatusDoneForID = $Record3["anzDone"];
-
-                if ($quantityOfArticles[$i] == $countStatusDoneForID) {
-
-                }
-            }*/
-
             header('Location: bäcker.php');
             die();
         }
