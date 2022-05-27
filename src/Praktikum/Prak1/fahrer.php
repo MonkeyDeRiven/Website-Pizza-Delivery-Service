@@ -66,26 +66,80 @@ class Fahrer extends Page
      */
     protected function getViewData():array
     {
+
+        //Bestellungen, deren Pizzen alle Status fertig sind, den Fahrer anzeigen lassen und veränderte Stati in die Datenbank übernehmen
         // to do: fetch data for this view from the database
         // to do: return array containing data
-        $sqlStatement = "SELECT ordering.address, ordering.ordering_id FROM ordering ORDER BY ordering.ordering_id ASC";
-        $sqlStatement2 = "SELECT article.name, article.price, ordered_article.ordering_id, ordered_article.status"
-                       . "From article join ordered_article On ordered_article.article_id = article.article_id"
-                       . "ORDER BY ordered_article.ordering_id ASC";
-;
-        $RecordSet = $this->_database->query($sqlStatement);
-        $RecordSet2 = $this->_database->query($sqlStatement2);
-        if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-        $DataArray = array();
-        $PizzaArray = array();
-        while($Record = $RecordSet->fetch_assoc()){
-            $DataArray[] = $Record["address"];
-            while($Record2 = $RecordSet2->fetch_assoc()){
-
-            }
-            $DataArray[] = $Record[""];
+        $totalOderSize = 0;
+        $sqlGetAllIds = "SELECT ordering_id FROM ordering";
+        $RecordSet = $this->_database->query($sqlGetAllIds);
+        if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+        $AllIDs = array();
+        while ($Record = $RecordSet->fetch_assoc()) {
+            $AllIDs[] = $Record["ordering_id"];
+            $totalOderSize++;
         }
-        return $DataArray;
+
+        $quantityOfArticles = array();
+        for ($i = 0; $i < $totalOderSize; $i++) {
+            $sqlCountArticlesForEach = "SELECT count(ordering_id) as anzOrder FROM ordering JOIN ordered_article using (ordering_id) where ordering_id = $AllIDs[$i]";
+            $RecordSet2 = $this->_database->query($sqlCountArticlesForEach);
+            if (!$RecordSet2) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            $Record2 = $RecordSet2->fetch_assoc();
+            $quantityOfArticles[] = $Record2["anzOrder"];
+        }
+
+
+        $notDoneOrders = array();
+        for ($i = 0; $i < $totalOderSize; $i++) {
+            $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status = 3";
+            $RecordSet3 = $this->_database->query($sqlCountStatusDone);
+            if (!$RecordSet3) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            $Record3 = $RecordSet3->fetch_assoc();
+            $countStatusDoneForID = $Record3["anzDone"];
+
+            if ($quantityOfArticles[$i] != $countStatusDoneForID) {
+                $sqlArtId = "SELECT ordered_article.article_id FROM ordering JOIN ordered_article USING(ordering_id) where ordering.ordering_id = ordered_article.ordering_id and ordering_id = $AllIDs[$i]";
+                $sqlAdr = "SELECT address FROM ordering where ordering_id = $AllIDs[$i]";
+                $articleId = array();
+                $articleString = " ";
+                $anzArticle = 0;
+
+                $RecordSet5 = $this->_database->query($sqlArtId);
+                if (!$RecordSet5) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+                while($Record5 = $RecordSet5->fetch_assoc()){
+                        $articleId = $Record5["article_id"];
+                        $anzArticle++;
+                }
+                for($j = 0; $j<$anzArticle; $j++){
+                    if($articleId[$j] == "1")
+                        $articleString = "$articleString , Pizza-Salami";
+                    if($articleId[$j] == "2")
+                        $articleString = "$articleString , Pizza-Vegetaria";
+                    if($articleId[$j] == "3")
+                        $articleString = "$articleString , Pizza-Spinat-Hühnchen";
+                }
+
+                $RecordSet6 = $this->_database->query($sqlAdr);
+                if (!$RecordSet6) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+                $Record6 = $RecordSet6->fetch_assoc();
+                $tmpString = $Record6["address"];
+                echo("$tmpString $articleString");
+                $notDoneOrders[] = "$tmpString, $articleString";
+            }
+        }
+
+
+        /*$sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
+        $this->_database->query($sqlDeleteOrder);
+
+        $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $AllIDs[$i]";
+        $this->_database->query($sqlDeleteArticles);*/
+
+
+
+
+    return $notDoneOrders;
     }
 
     /**

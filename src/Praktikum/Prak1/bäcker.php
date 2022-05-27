@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 // UTF-8 marker äöüÄÖÜß€
+
+//Mission: Bestellungen, deren Pizzen alle Status fertig sind, von der Datenbank entfernen, sodass es nicht mehr angezeigt wird auf der Seite
+//Veränderte Stati in die Datenbank rein
 /**
  * Class PageTemplate for the exercises of the EWA lecture
  * Demonstrates use of PHP including class and OO.
@@ -101,7 +104,7 @@ class Bäcker extends Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
-                <meta charset="UTF-8" http-equiv="refresh" content="10" />
+                <meta charset="UTF-8"  />
                 <!-- für später: CSS include -->
                 <!-- <link rel="stylesheet" href="XXX.css"/> -->
                 <!-- für später: JavaScript include -->
@@ -111,7 +114,7 @@ class Bäcker extends Page
         <body>
             <section>
                 <h1>Pizzabäcker (bestellte Pizzen)</h1>
-                    <form name="fortschritte[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">
+                    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="bäcker.php/">
                             <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
                             for($i = 0; $i < count($Data); $i+=4){
@@ -123,36 +126,36 @@ class Bäcker extends Page
                                     <p>
                                         {$PizzaName}{$OrderingID}
                                 EOT2;
-                                        if($ProcessStatus == "0"){
+                                        if($ProcessStatus == "1"){
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="1" checked/>
+                                                <input type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="1" checked/>
                                             EOT2;
                                         }
                                         else{
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="1"/>
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="1"/>
                                             EOT2;
                                         }
 
-                                        if($ProcessStatus == "1"){
+                                        if($ProcessStatus == "2"){
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="2" checked/>
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" checked/>
                                             EOT2;
                                         }
                                         else{
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="2" />
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" />
                                             EOT2;
                                         }
 
                                         if($ProcessStatus >= 3){
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="3" checked />
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="3" checked />
                                             EOT2;
                                         }
                                         else{
                                             echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" value="3" />
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="3" />
                                             EOT2;
                                         }
                                         echo <<< EOT2
@@ -180,8 +183,76 @@ class Bäcker extends Page
     protected function processReceivedData():void
     {
         parent::processReceivedData();
+
+
+        if(isset($_POST)) {
+            $totalOderSize = 0;
+            $numOfOrderedArticle = 0;
+
+
+            //Statusänderung
+            $orderedArticleID = array();
+            $orderedArticleStatus = array();
+            $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article";
+            $RecordSet4 = $this->_database->query($sqlGetOrdArtID);
+            if (!$RecordSet4) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            while ($Record4 = $RecordSet4->fetch_assoc()) {
+                $orderedArticleID[] = $Record4["ordered_article_id"];
+                $orderedArticleStatus = $Record4["status"];
+                $numOfOrderedArticle++;
+            }
+
+            $allStatFromPost = array();
+            foreach($_POST as $key => $value){
+                $allStatFromPost[] = $value;
+            }
+
+            for($i = 0; $i<$numOfOrderedArticle; $i++) {
+                $sqlUpdateAllStat = "UPDATE ordered_article SET status = $allStatFromPost[$i] where ordered_article_id = $orderedArticleID[$i]";
+                $this->_database->query($sqlUpdateAllStat);
+            }
+
+
+            //Statusabfrage und Datenlöschung
+            $sqlGetAllIds = "SELECT ordering_id FROM ordering";
+            $RecordSet = $this->_database->query($sqlGetAllIds);
+            if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            $AllIDs = array();
+            while ($Record = $RecordSet->fetch_assoc()) {
+                $AllIDs[] = $Record["ordering_id"];
+                $totalOderSize++;
+            }
+
+            $quantityOfArticles = array();
+            for ($i = 0; $i < $totalOderSize; $i++) {
+                $sqlCountArticlesForEach = "SELECT count(ordering_id) as anzOrder FROM ordering JOIN ordered_article using (ordering_id) where ordering_id = $AllIDs[$i]";
+                $RecordSet2 = $this->_database->query($sqlCountArticlesForEach);
+                if (!$RecordSet2) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+                $Record2 = $RecordSet2->fetch_assoc();
+                $quantityOfArticles[] = $Record2["anzOrder"];
+            }
+
+            for ($i = 0; $i < $totalOderSize; $i++) {
+                $sqlCountStatusDone = "SELECT count(status) as anzDone from ordered_article WHERE ordering_id = $AllIDs[$i] AND status = 3";
+                $RecordSet3 = $this->_database->query($sqlCountStatusDone);
+                if (!$RecordSet3) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+                $Record3 = $RecordSet3->fetch_assoc();
+                $countStatusDoneForID = $Record3["anzDone"];
+
+                if ($quantityOfArticles[$i] == $countStatusDoneForID) {
+                    $sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
+                    $this->_database->query($sqlDeleteOrder);
+
+                    $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $AllIDs[$i]";
+                    $this->_database->query($sqlDeleteArticles);
+                }
+            }
+
+        }
         // to do: call processReceivedData() for all members
     }
+
+
 
     /**
      * This main-function has the only purpose to create an instance
