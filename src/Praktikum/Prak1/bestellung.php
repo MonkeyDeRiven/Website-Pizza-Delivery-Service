@@ -210,6 +210,7 @@ class Bestellung extends Page
 
                     $this->_database->query($sqlStatement);
                 }
+                $_SESSION["orderID"] = $orderId;
                 $this->_database->commit();
             }catch(Exception $e){
                 $this->_database->rollback();
@@ -235,6 +236,7 @@ class Bestellung extends Page
     public static function main():void
     {
         try {
+            session_start();
             $page = new Bestellung();
             $page->processReceivedData();
             $page->generateView();

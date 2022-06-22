@@ -166,7 +166,7 @@ class Fahrer extends Page
     {
 
         $Data = $this->getViewData();
-       // $this->generatePageHeader('Fahrer'); //to do: set optional parameters
+        $this->generatePageHeader('Fahrer'); //to do: set optional parameters
 
         header("Content-type:text/html");
 

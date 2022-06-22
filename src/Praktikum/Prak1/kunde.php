@@ -94,7 +94,7 @@ class Kunde extends Page
     protected function generateView():void
     {
         $Data = $this->getViewData();
-        $this->generatePageHeader('Bäcker'); //to do: set optional parameters
+        $this->generatePageHeader('Kunde'); //to do: set optional parameters
         //header("Content-type: text/html");
         $title = "Bäcker";
         echo <<< EOT
@@ -111,9 +111,30 @@ class Kunde extends Page
         <body>
             <section>
                 <h1>Kunde (bestellte Pizzen)</h1>
-                    <form name="fortschritte[]" accept-charset="UTF-8" method="get" action="https://echo.fbi.h-da.de/">
-                            <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
+        for($i = 0; $i < count($Data); $i+=4){
+            $pizzaName = $Data[$i];
+            $orderId = $Data[$i+2];
+            $pizzaStatus = "";
+            if($Data[$i+3] == 0){
+                $pizzaStatus = "bestellt";
+            }
+            else if($Data[$i+3] == 1){
+                $pizzaStatus = "im ofen";
+            }
+            else if($Data[$i+3] == 2){
+                $pizzaStatus = "fertig";
+            }
+            else if($Data[$i+3] == 3){
+                $pizzaStatus = "unterwegs";
+            }
+            if(isset($_SESSION) && $_SESSION["orderID"] == $orderId) {
+                echo <<< EOT
+                    <p>{$pizzaName}: $pizzaStatus</p> 
+                EOT;
+            }
+
+        }
 
         echo <<< EOT
                 </section>
@@ -150,6 +171,7 @@ class Kunde extends Page
     public static function main():void
     {
         try {
+            session_start();
             $page = new Kunde();
             $page->processReceivedData();
             $page->generateView();
