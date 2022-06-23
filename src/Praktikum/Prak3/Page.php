@@ -73,6 +73,7 @@ abstract class Page
      */
     public function __destruct()
     {
+        $this->_database->close();
         // to do: close database
     }
 
@@ -90,7 +91,26 @@ abstract class Page
     protected function generatePageHeader(string $title = "", string $jsFile = "", bool $autoreload = false):void
     {
         $title = htmlspecialchars($title);
-        header("Content-type: text/html; charset=UTF-8");
+        echo <<< EOT
+        <!DOCTYPE html>
+        <html lang="de">
+            <head>
+        EOT;
+        if($autoreload == true){
+            echo <<< EOT
+                <meta charset="UTF-8" http-equiv="refresh" content="5"/>
+            EOT;
+        }
+        else{
+            echo <<< EOT
+                <meta charset="UTF-8"/>
+            EOT;
+        }
+        echo <<< EOT
+            <title>$title</title>
+            </head>
+        EOT;
+
 
         // to do: handle all parameters
         // to do: output common beginning of HTML code
@@ -102,6 +122,9 @@ abstract class Page
      */
     protected function generatePageFooter():void
     {
+        echo <<< EOT
+            </html>
+        EOT;
         // to do: output common end of HTML code
     }
 

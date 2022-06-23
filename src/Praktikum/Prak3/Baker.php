@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 // UTF-8 marker äöüÄÖÜß€
+
+//Mission: Bestellungen, deren Pizzen alle Status fertig sind, von der Datenbank entfernen, sodass es nicht mehr angezeigt wird auf der Seite
+//Veränderte Stati in die Datenbank rein
 /**
  * Class PageTemplate for the exercises of the EWA lecture
  * Demonstrates use of PHP including class and OO.
@@ -30,7 +33,7 @@ require_once './Page.php';
  * @author   Bernhard Kreling, <bernhard.kreling@h-da.de>
  * @author   Ralf Hahn, <ralf.hahn@h-da.de>
  */
-class Customer extends Page
+class Baker extends Page
 {
     // to do: declare reference variables for members
     // representing substructures/blocks
@@ -70,17 +73,31 @@ class Customer extends Page
         // to do: return array containing data
         $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
             . "From ordered_article join article "
-            . "on article.article_id = ordered_article.article_id";
+            . "on article.article_id = ordered_article.article_id "
+            . "Where status < 2";
+
         $RecordSet = $this->_database->query($sqlStatement);
         if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-        $DataArray = array();
+        $DataArray = array();;
         while($Record = $RecordSet->fetch_assoc()){
             $DataArray[] = $Record["name"];
             $DataArray[] = $Record["ordered_article_id"];
             $DataArray[] = $Record["ordering_id"];
             $DataArray[] = $Record["status"];
         }
+        $RecordSet->free();
         return $DataArray;
+    }
+
+    private function deleteFinishedOrders(array $orderList){
+        $orderStartIndex = 0;
+        $orderEndIndex = 0;
+        $isOrderDone = true;
+        for($i = 1; $i < count($orderList)-1; $i++){
+            if($orderList[$i] != $orderList[$i-1]){
+
+            }
+        }
     }
 
     /**
@@ -94,52 +111,73 @@ class Customer extends Page
     protected function generateView():void
     {
         $Data = $this->getViewData();
-        $this->generatePageHeader('Kunde'); //to do: set optional parameters
+        $this->generatePageHeader('Bäcker', "", true); //to do: set optional parameters
         //header("Content-type: text/html");
         echo <<< EOT
-        <!DOCTYPE html>
-        <html lang="de">
-            <head>
-                <meta charset="UTF-8" http-equiv="refresh" content="10" />
-                <!-- für später: CSS include -->
-                <!-- <link rel="stylesheet" href="XXX.css"/> -->
-                <!-- für später: JavaScript include -->
-                <!-- <script src="XXX.js"></script> -->
-                <title>Kunde</title>
-            </head>
         <body>
             <section>
-                <h1>Kunde (bestellte Pizzen)</h1>
+                <h1>Pizzabäcker (bestellte Pizzen)</h1>
+                    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="Baker.php">
+                            <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
-        for($i = 0; $i < count($Data); $i+=4){
-            $pizzaName = $Data[$i];
-            $orderId = $Data[$i+2];
-            $pizzaStatus = "";
-            if($Data[$i+3] == 0){
-                $pizzaStatus = "bestellt";
-            }
-            else if($Data[$i+3] == 1){
-                $pizzaStatus = "im ofen";
-            }
-            else if($Data[$i+3] == 2){
-                $pizzaStatus = "fertig";
-            }
-            else if($Data[$i+3] == 3){
-                $pizzaStatus = "unterwegs";
-            }
-            if(isset($_SESSION) && $_SESSION["orderID"] == $orderId) {
-                echo <<< EOT
-                    <p>{$pizzaName}: $pizzaStatus</p> 
-                EOT;
-            }
+        if(count($Data) == 0){
+            echo <<< EOT
+                <p>Momentan sind keine weitere Bestellunge vorhanden!</p>
+            EOT;
 
         }
+        for($i = 0; $i < count($Data); $i+=4){
+            $PizzaName = $Data[$i];
+            $OrderedArticleID = $Data[$i+1];
+            $OrderingID = $Data[$i+2];
+            $ProcessStatus = $Data[$i+3];
+            echo <<< EOT2
+                                    <p>
+                                        {$PizzaName}{$OrderingID}
+                                EOT2;
+            if($ProcessStatus == "0"){
+                echo <<< EOT2
+                                                <input type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0" checked/>
+                                            EOT2;
+            }
+            else{
+                echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0"/>
+                                            EOT2;
+            }
+            if($ProcessStatus == "1"){
+                echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="1" checked/>
+                                            EOT2;
+            }
+            else{
+                echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="1" />
+                                            EOT2;
+            }
+            if($ProcessStatus >= "2"){
+                echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" checked />
+                                            EOT2;
+            }
+            else{
+                echo <<< EOT2
+                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" />
+                                            EOT2;
+            }
 
+            echo <<< EOT2
+                                        </p>
+                                        EOT2;
+        }
         echo <<< EOT
+                        <input name="checkInput" value="true" hidden /> 
+                        <input type="submit" value="abschicken" />
+                        <input type="reset" value="löschen aller" />
+                    </form>
                 </section>
             </body>
-        </html>
-    EOT;
+        EOT;
 
         $this->generatePageFooter();
     }
@@ -153,8 +191,41 @@ class Customer extends Page
     protected function processReceivedData():void
     {
         parent::processReceivedData();
+
+        if(isset($_POST["checkInput"])) {
+            $totalOderSize = 0;
+            $numOfOrderedArticle = 0;
+
+            //Statusänderung
+            $orderedArticleID = array();
+            $orderedArticleStatus = array();
+            $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article Where status < 2";
+            $RecordSet4 = $this->_database->query($sqlGetOrdArtID);
+            if (!$RecordSet4) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            while ($Record4 = $RecordSet4->fetch_assoc()) {
+                $orderedArticleID[] = $Record4["ordered_article_id"];
+                $orderedArticleStatus = $Record4["status"];
+                $numOfOrderedArticle++;
+            }
+
+            $allStatFromPost = array();
+            foreach($_POST as $key => $value){
+                if($value != "checkInput") {
+                    $allStatFromPost[] = $value;
+                }
+            }
+
+            for($i = 0; $i<$numOfOrderedArticle; $i++) {
+                $sqlUpdateAllStat = "UPDATE ordered_article SET status = $allStatFromPost[$i] where ordered_article_id = $orderedArticleID[$i]";
+                $this->_database->query($sqlUpdateAllStat);
+            }
+            header('Location: Baker.php');
+            die();
+        }
         // to do: call processReceivedData() for all members
     }
+
+
 
     /**
      * This main-function has the only purpose to create an instance
@@ -170,8 +241,7 @@ class Customer extends Page
     public static function main():void
     {
         try {
-            session_start();
-            $page = new Customer();
+            $page = new Baker();
             $page->processReceivedData();
             $page->generateView();
         } catch (Exception $e) {
@@ -184,7 +254,7 @@ class Customer extends Page
 
 // This call is starting the creation of the page.
 // That is input is processed and output is created.
-Customer::main();
+Baker::main();
 
 // Zend standard does not like closing php-tag!
 // PHP doesn't require the closing tag (it is assumed when the file ends).
@@ -192,4 +262,3 @@ Customer::main();
 // like additional whitespace which will cause session
 // initialization to fail ("headers already
 ?>
-

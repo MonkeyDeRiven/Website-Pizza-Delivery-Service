@@ -30,7 +30,7 @@ require_once './Page.php';
  * @author   Bernhard Kreling, <bernhard.kreling@h-da.de>
  * @author   Ralf Hahn, <ralf.hahn@h-da.de>
  */
-class Order extends Page
+class Customer extends Page
 {
     // to do: declare reference variables for members
     // representing substructures/blocks
@@ -68,17 +68,19 @@ class Order extends Page
     {
         // to do: fetch data for this view from the database
         // to do: return array containing data
-        $sqlStatement = "SELECT article.picture, article.name, article.price FROM article";
-
-
+        $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
+            . "From ordered_article join article "
+            . "on article.article_id = ordered_article.article_id";
         $RecordSet = $this->_database->query($sqlStatement);
         if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
         $DataArray = array();
         while($Record = $RecordSet->fetch_assoc()){
-            $DataArray[] = $Record["picture"];
             $DataArray[] = $Record["name"];
-            $DataArray[] = $Record["price"];
+            $DataArray[] = $Record["ordered_article_id"];
+            $DataArray[] = $Record["ordering_id"];
+            $DataArray[] = $Record["status"];
         }
+        $RecordSet->free();
         return $DataArray;
     }
 
@@ -93,59 +95,41 @@ class Order extends Page
     protected function generateView():void
     {
         $Data = $this->getViewData();
-        $this->generatePageHeader('Bestellung'); //to do: set optional parameters
+        $this->generatePageHeader('Kunde'); //to do: set optional parameters
         //header("Content-type: text/html");
         echo <<< EOT
-        <!DOCTYPE html>
-        <html lang="de">
-            <head>
-                <meta charset="UTF-8"/>
-                <!-- für später: CSS include -->
-                <!-- <link rel="stylesheet" href="XXX.css"/> -->
-                <!-- für später: JavaScript include -->
-                <!-- <script src="XXX.js"></script> -->
-                <title>Bestellung</title>
-            </head>
-            <body>
+        <body>
             <section>
-                <h1>Bestellung</h1>
+                <h1>Kunde (bestellte Pizzen)</h1>
         EOT;
-        $HCount = 2;
-        for($i = 0; $i < count($Data); $i+=3){
-            $PizzaPicture = $Data[$i];
-            $PizzaName = $Data[$i+1];
-            $PizzaPrice = $Data[$i+2];
-
-            echo <<< EOT
-                        <article>
-                            <h{$HCount}>$PizzaName</h{$HCount}>
-                            <p>
-                                <button><img src="$PizzaPicture" height="100" width="100" /></button>
-                                {$PizzaPrice} €
-                            </p>
-                        </article>
-                    EOT;
-            $HCount++;
+        for($i = 0; $i < count($Data); $i+=4){
+            $pizzaName = $Data[$i];
+            $orderId = $Data[$i+2];
+            $pizzaStatus = "";
+            if($Data[$i+3] == 0){
+                $pizzaStatus = "bestellt";
+            }
+            else if($Data[$i+3] == 1){
+                $pizzaStatus = "im ofen";
+            }
+            else if($Data[$i+3] == 2){
+                $pizzaStatus = "fertig";
+            }
+            else if($Data[$i+3] == 3){
+                $pizzaStatus = "unterwegs";
+            }
+            if(isset($_SESSION) && $_SESSION["orderID"] == $orderId) {
+                echo <<< EOT
+                    <p>{$pizzaName}: $pizzaStatus</p> 
+                EOT;
+            }
         }
         echo <<< EOT
-                <section>
-                <h{$HCount}>Warenkorb</h{$HCount}>
                 </section>
-                <form accept-charset="UTF-8" method="post" action="order.php" id="orderFormular">
-                    <select name="Order[]" id="order" multiple>
-                        <option value="Salami">Pizza-Salami</option>
-                        <option value="Vegetaria">Pizza-Vegetaria</option>
-                        <option value="Spinat-Hühnchen">Pizza-Spinat-Hühnchen</option>
-                    </select>
-                    <p>Gesamtpreis: 0.00€</p>
-                    <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required>
-                    <button type="submit">bestellen</button>
-                    <button type="reset">löschen</button>
-                </form>
-                </section>
+                <a href="Order.php"><button>Neue Bestellung</button></a>
+                
             </body>
-        </html>
-        EOT;
+    EOT;
 
         $this->generatePageFooter();
     }
@@ -156,69 +140,10 @@ class Order extends Page
      * data do it here.
      * @return void
      */
-    protected function getPizzaId($pizzaName){
-        $value = 0;
-        if($pizzaName == "Salami")
-            $value = 1;
-        if($pizzaName == "Vegetaria")
-            $value = 2;
-        if($pizzaName == "Spinat-Hühnchen")
-            $value = 3;
-
-        return $value;
-    }
     protected function processReceivedData():void
     {
         parent::processReceivedData();
-
-
         // to do: call processReceivedData() for all members
-        if (isset($_POST["Address"])){
-            $addr = $_POST["Address"];
-            $timestamp = date('Y-m-d H:i:s');
-
-            try {
-
-                $this->_database->begin_transaction();
-                $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
-                $this->_database->query($sqlStatement);
-
-                $numberOfOrderedPizzas = count($_POST["Order"]);
-                $orderedPizzas = $_POST["Order"];
-
-                $sqlStatementSel = "SELECT ordering_id from ordering where ordering_time = '$timestamp'";
-                $orderId = 0;
-                $RecordSet = $this->_database->query($sqlStatementSel);
-                if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-
-                while ($Record = $RecordSet->fetch_assoc()) {
-                    $orderId = $Record["ordering_id"];
-                }
-
-                $sqlStatementPizzaWithId = "Select name, article_id From article";
-                $RecordSet = $this->_database->query($sqlStatementPizzaWithId);
-
-                $pizzaIdList = array();
-                while ($Record = $RecordSet->fetch_assoc()) {
-                    $pizzaIdList[$Record["name"]] = $Record["article_id"];
-                }
-
-                for ($i = 0; $i < $numberOfOrderedPizzas; $i++) {
-                    $articleId = $pizzaIdList[$orderedPizzas[$i]];
-                    $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, $articleId,0)";
-
-                    $this->_database->query($sqlStatement);
-                }
-                $_SESSION["orderID"] = $orderId;
-                $this->_database->commit();
-            }catch(Exception $e){
-                $this->_database->rollback();
-            }
-
-            header('Location: customer.php');
-            die;
-        }
-
     }
 
     /**
@@ -236,10 +161,9 @@ class Order extends Page
     {
         try {
             session_start();
-            $page = new Order();
+            $page = new Customer();
             $page->processReceivedData();
             $page->generateView();
-            print_r($_POST);
         } catch (Exception $e) {
             //header("Content-type: text/plain; charset=UTF-8");
             //header("Content-type: text/html; charset=UTF-8");
@@ -250,7 +174,7 @@ class Order extends Page
 
 // This call is starting the creation of the page.
 // That is input is processed and output is created.
-Order::main();
+Customer::main();
 
 // Zend standard does not like closing php-tag!
 // PHP doesn't require the closing tag (it is assumed when the file ends).
@@ -258,3 +182,4 @@ Order::main();
 // like additional whitespace which will cause session
 // initialization to fail ("headers already
 ?>
+

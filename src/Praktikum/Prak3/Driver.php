@@ -143,7 +143,7 @@ class Driver extends Page
                 $counter++;
             }
         }
-
+        $RecordSet->free();
 
         /*$sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
         $this->_database->query($sqlDeleteOrder);
@@ -167,28 +167,12 @@ class Driver extends Page
 
         $Data = $this->getViewData();
         $this->generatePageHeader('Fahrer'); //to do: set optional parameters
-
-        header("Content-type:text/html");
-
-
+        // whats that? <html lang="de" xmlns="http://www.w3.org/1999/html">
         echo <<< EOT
-        <!DOCTYPE html>
-        <html lang="de" xmlns="http://www.w3.org/1999/html">
-            <head>
-                <meta charset="UTF-8" />
-                <!-- für später: CSS include -->
-                <!-- <link rel="stylesheet" href="XXX.css"/> -->
-                <!-- für später: JavaScript include -->
-                <!-- <script src="XXX.js"></script> -->
-                <title>Fahrer</title>
-            </head>
          <body>
             <section>
                 <h1>Fahrer (auslieferbare Bestellungen)</h1>
-                    <form name="lieferstatus[]" accept-charset="UTF-8" method="post" action="driver.php">
-                            
-                           <p><b> Bestellt\n   Im Ofen  \n Fertig</b></p>
-
+                    <form name="lieferstatus[]" accept-charset="UTF-8" method="post" action="Driver.php">
         EOT;
         for($i = 0; $i<count($Data); $i = $i+3){
             $orderDisplay = $Data[$i];
@@ -197,6 +181,7 @@ class Driver extends Page
 
             echo <<< EOT
                 <p><b>$orderDisplay</b></p>
+                <p>fertig/unterwegs/geliefert</p>
                 EOT;
 
             if($orderStatus == "2"){echo <<< EOT
@@ -232,7 +217,6 @@ class Driver extends Page
                     </form>
                 </section>
             </body>
-        </html>
 EOT;
 
         $this->generatePageFooter();
@@ -275,7 +259,7 @@ EOT;
                     $this->_database->query($sqlDeleteArticles);
                 }
             }
-            header("Location: driver.php");
+            header("Location: Driver.php");
             die;
         }
         // to do: call processReceivedData() for all members
