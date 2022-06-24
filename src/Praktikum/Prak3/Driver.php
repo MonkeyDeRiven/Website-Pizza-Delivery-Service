@@ -129,7 +129,7 @@ class Driver extends Page
                 $RecordSet6 = $this->_database->query($sqlAdr);
                 if (!$RecordSet6) throw new Exception("Error in sqlStatement: " . $this->_database->error);
                 $Record6 = $RecordSet6->fetch_assoc();
-                $tmpString = $Record6["address"];
+                $tmpString = htmlspecialchars($Record6["address"]);
                 $notDoneOrders[] = "$tmpString, $articleString";
 
                 $RecordSet7 = $this->_database->query("SELECT DISTINCT status FROM ordered_article WHERE ordering_id = $AllIDs[$i]");

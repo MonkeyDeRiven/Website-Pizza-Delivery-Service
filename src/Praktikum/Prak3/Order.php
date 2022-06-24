@@ -164,11 +164,10 @@ class Order extends Page
 
         // to do: call processReceivedData() for all members
         if (isset($_POST["Address"])){
-            $addr = $_POST["Address"];
+            $addr = $this->_database->real_escape_string($_POST["Address"]);
             $timestamp = date('Y-m-d H:i:s');
 
-            try {
-                $this->_database->begin_transaction();
+            try {$this->_database->begin_transaction();
                 $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
                 $this->_database->query($sqlStatement);
 
