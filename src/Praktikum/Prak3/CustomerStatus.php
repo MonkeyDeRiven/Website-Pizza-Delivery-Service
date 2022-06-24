@@ -68,20 +68,24 @@ class CustomerStatus extends Page
     {
         // to do: fetch data for this view from the database
         // to do: return array containing data
-        $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
-            . "From ordered_article join article "
-            . "on article.article_id = ordered_article.article_id";
-        $RecordSet = $this->_database->query($sqlStatement);
-        if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
         $orderArray = array();
-        while($Record = $RecordSet->fetch_assoc()){
-            $DataArray["name"] = $Record["name"];
-            $DataArray["ordered_article_id"] = $Record["ordered_article_id"];
-            $DataArray["ordering_id"] = $Record["ordering_id"];
-            $DataArray["status"] = $Record["status"];
-            $orderArray[] = $DataArray;
+        if(isset($_SESSION)) {
+            $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
+                . "From ordered_article join article "
+                . "on article.article_id = ordered_article.article_id";
+            $RecordSet = $this->_database->query($sqlStatement);
+            if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+            while ($Record = $RecordSet->fetch_assoc()) {
+                if($_SESSION["orderID"] == $Record["ordering_id"]) {
+                    $DataArray["name"] = $Record["name"];
+                    $DataArray["ordered_article_id"] = $Record["ordered_article_id"];
+                    $DataArray["ordering_id"] = $Record["ordering_id"];
+                    $DataArray["status"] = $Record["status"];
+                    $orderArray[] = $DataArray;
+                }
+            }
+            $RecordSet->free();
         }
-        $RecordSet->free();
         return $orderArray;
     }
 
