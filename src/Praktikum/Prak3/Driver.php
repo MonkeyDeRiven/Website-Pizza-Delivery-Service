@@ -67,9 +67,11 @@ class Driver extends Page
     protected function getViewData():array
     {
 
+
         //Bestellungen, deren Pizzen alle Status fertig sind, den Fahrer anzeigen lassen und veränderte Stati in die Datenbank übernehmen
         // to do: fetch data for this view from the database
         // to do: return array containing data
+        /*
         $totalOderSize = 0;
         $sqlGetAllIds = "SELECT ordering_id FROM ordering";
         $RecordSet = $this->_database->query($sqlGetAllIds);
@@ -111,6 +113,7 @@ class Driver extends Page
                 while($Record5 = $RecordSet5->fetch_assoc()){
                     $articleId[] = $Record5["article_id"];
                     $anzArticle++;
+
                 }
 
                 $sqlStatementPizzaWithId = "Select article_id, name From article";
@@ -145,13 +148,41 @@ class Driver extends Page
         }
         $RecordSet->free();
 
+        */
+
         /*$sqlDeleteOrder = "DELETE FROM ordering where ordering.ordering_id = $AllIDs[$i] ";
         $this->_database->query($sqlDeleteOrder);
 
         $sqlDeleteArticles = "DELETE FROM ordered_article where ordered_article.ordering_id = $AllIDs[$i]";
         $this->_database->query($sqlDeleteArticles);*/
 
-        return $notDoneOrders;
+        $getPizzaNames = $this->_database->prepare("select name from ordering natural join ordered_article natural join article where ordering_id = ?");
+
+        $getAllDoneOrders = "select ordering_id, ordering.address, status, " .
+                            "sum(article.price) as total, " .
+                            "sum(ordered_article.status) as totalStatus, " .
+                            "count(*) as totalItems " .
+                            "from ordering natural join ordered_article natural join article " .
+                            "group by ordering_id " .
+                            "having totalStatus/totalItems >= 2 ";
+
+        $RecordSet = $this->_database->query($getAllDoneOrders);
+        $Data = array();
+        $pizzaNames = array();
+        if (!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+        while($Record = $RecordSet->fetch_assoc()) {
+            $Data[] = $Record["address"];
+            $Data[] = $Record["status"];
+            $Data[] = $Record["id"];
+            $Data[] = $Record["total"];
+            $getPizzaNames->bind_param("s", $Record["id"]);
+            $pizzaNamesRecordSet = $getPizzaNames->execute();
+            while($pizzaNamesRecord = $pizzaNamesRecordSet->fetch_assoc()){
+                $pizzaNames[] = $pizzaNamesRecord["name"];
+            }
+            $Data[] = $pizzaNames;
+        }
+        return $Data;
     }
 
     /**
@@ -174,13 +205,24 @@ class Driver extends Page
                 <h1>Fahrer (auslieferbare Bestellungen)</h1>
                     <form name="lieferstatus[]" accept-charset="UTF-8" method="post" action="Driver.php">
         EOT;
-        for($i = 0; $i<count($Data); $i = $i+3){
-            $orderDisplay = $Data[$i];
+        for($i = 0; $i<count($Data); $i = $i+5){
+            $address = $Data[$i];
             $orderStatus = $Data[$i+1];
             $orderID = $Data[$i+2];
+            $totalPrice = $Data[$i+3];
+            $pizzaNames = $Data[$i+4];
 
             echo <<< EOT
-                <p><b>$orderDisplay</b></p>
+                <p><b>$address, $totalPrice</b></p>
+                <p>
+            EOT;
+            for($i = 0; $i < count($pizzaNames); $i++){
+                echo <<< EOT
+                    $pizzaNames[$i] , 
+                EOT;
+            }
+            echo <<< EOT
+                </p>
                 <p>fertig/unterwegs/geliefert</p>
                 EOT;
 
