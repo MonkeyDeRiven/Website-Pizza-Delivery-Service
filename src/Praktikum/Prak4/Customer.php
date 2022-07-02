@@ -99,32 +99,10 @@ class Customer extends Page
         //header("Content-type: text/html");
         echo <<< EOT
         <body>
-            <section>
+            <script src="StatusUpdate.js"></script>
+            <section id="orderStatusSection">
                 <h1>Kunde (bestellte Pizzen)</h1>
-        EOT;
-        for($i = 0; $i < count($Data); $i+=4){
-            $pizzaName = $Data[$i];
-            $orderId = $Data[$i+2];
-            $pizzaStatus = "";
-            if($Data[$i+3] == 0){
-                $pizzaStatus = "bestellt";
-            }
-            else if($Data[$i+3] == 1){
-                $pizzaStatus = "im ofen";
-            }
-            else if($Data[$i+3] == 2){
-                $pizzaStatus = "fertig";
-            }
-            else if($Data[$i+3] == 3){
-                $pizzaStatus = "unterwegs";
-            }
-            if(isset($_SESSION) && $_SESSION["orderID"] == $orderId) {
-                echo <<< EOT
-                    <p>{$pizzaName}: $pizzaStatus</p> 
-                EOT;
-            }
-        }
-        echo <<< EOT
+        
                 </section>
                 <a href="Order.php"><button>Neue Bestellung</button></a>
                 
@@ -142,6 +120,12 @@ class Customer extends Page
      */
     protected function processReceivedData():void
     {
+        header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
+        header("Expires: Sat, 01 Jul 2000 06:00:00 GMT"); // Datum in der Vergangenheit
+        header("Cache-Control: post-check=0, pre-check=0", false); // fuer IE
+        header("Pragma: no-cache");
+        session_cache_limiter('nocache'); // VOR session_start()!
+        session_cache_expire(0);
         parent::processReceivedData();
         // to do: call processReceivedData() for all members
     }
