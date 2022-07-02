@@ -206,7 +206,7 @@ class Driver extends Page
          <body>
             <section>
                 <h1>Fahrer (auslieferbare Bestellungen)</h1>
-                    <form name="lieferstatus[]" accept-charset="UTF-8" method="post" action="Driver.php">
+                    <form name="lieferstatus[]" id="driverForm" accept-charset="UTF-8" method="post" action="Driver.php">
         EOT;
         for($i = 0; $i<count($Data); $i = $i+5){
             $address = $this->_database->real_escape_string($Data[$i]);
@@ -240,34 +240,33 @@ class Driver extends Page
                 EOT;
 
             if($orderStatus == "2"){echo <<< EOT
-                <input type="radio"  name="$orderID$orderStatus" value="$orderID,2," checked/>
+                <input onclick="document.forms['driverForm'].submit();" type="radio"  name="$orderID$orderStatus" value="$orderID,2," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus" value="$orderID,2,"/>
+                <input onclick="document.forms['driverForm'].submit();" type="radio" name="$orderID$orderStatus" value="$orderID,2,"/>
             EOT;
             }
 
             if($orderStatus == "3"){ echo <<< EOT
-                 <input type="radio"  name="$orderID$orderStatus" value="$orderID,3," checked/>
+                 <input onclick="document.forms['driverForm'].submit();" type="radio"  name="$orderID$orderStatus" value="$orderID,3," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus" value="$orderID,3,"/>
+                <input onclick="document.forms['driverForm'].submit();" type="radio" name="$orderID$orderStatus" value="$orderID,3,"/>
             EOT;
             }
 
             if($orderStatus == "4"){ echo <<< EOT
-                 <input type="radio"  name="$orderID$orderStatus" value="$orderID,4," checked/>
+                 <input onclick="document.forms['driverForm'].submit();" type="radio"  name="$orderID$orderStatus" value="$orderID,4," checked/>
             EOT;
             }else{ echo <<< EOT
-                <input type="radio" name="$orderID$orderStatus" value="$orderID,4,"/>
+                <input onclick="document.forms['driverForm'].submit();" type="radio" name="$orderID$orderStatus" value="$orderID,4,"/>
             EOT;
             }
         }
 
         echo <<< EOT
                         <p></p>
-                        <input name="checkInput" value="true" hidden /> 
-                        <input type="submit" value="abschicken" />
+                        <input name="checkInput" value="true" hidden />               
                         <input type="reset" value="löschen" />
                     </form>
                 </section>

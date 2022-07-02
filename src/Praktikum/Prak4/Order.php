@@ -123,11 +123,11 @@ class Order extends Page
                 <h{$HCount}>Warenkorb</h{$HCount}>
                 </section>
                 <form accept-charset="UTF-8" method="post" action="Order.php" id="orderFormular">
-                    <textarea id="shoppingCart"></textarea>
+                    <textarea id="shoppingCart" name="shoppingCart" readonly ></textarea>
                     <p id="totalPrice">Gesamtpreis: 0.00 €</p>
-                    <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required>
-                    <button type="submit">bestellen</button>
-                    <button type="reset" onclick="resetShoppingCart()">löschen</button>
+                    <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required oninput="enableSubmitButton()">
+                    <button type="submit" disabled="true" id="submitButton">bestellen</button>
+                    <button type="reset" onclick="resetShoppingCart()" >löschen</button>
                 </form>
                 </section>
             </body>
@@ -150,15 +150,19 @@ class Order extends Page
 
         // to do: call processReceivedData() for all members
         if (isset($_POST["Address"])){
+
             $addr = $this->_database->real_escape_string($_POST["Address"]);
             $timestamp = date('Y-m-d H:i:s');
 
-            try {$this->_database->begin_transaction();
+            try {
+                $this->_database->begin_transaction();
                 $sqlStatement = "INSERT INTO ordering (address, ordering_time) VALUES('$addr', '$timestamp')";
                 $this->_database->query($sqlStatement);
 
-                $numberOfOrderedPizzas = count($_POST["Order"]);
-                $orderedPizzas = $_POST["Order"];
+                $orderedPizzas = $_POST["shoppingCart"];
+                $pizzaArray = array();
+                $pizzaArray =  preg_split("/\n/", $orderedPizzas); //Pattern für Anfang und Ende angeben beim Delimiter /
+                $numberOfOrderedPizzas = count($pizzaArray) - 1;
 
                 $sqlStatementSel = "SELECT ordering_id from ordering where ordering_time = '$timestamp'";
                 $orderId = 0;
@@ -176,9 +180,9 @@ class Order extends Page
                 while ($Record = $RecordSet->fetch_assoc()) {
                     $pizzaIdList[$Record["name"]] = $Record["article_id"];
                 }
-
                 for ($i = 0; $i < $numberOfOrderedPizzas; $i++) {
-                    $articleId = $pizzaIdList[$orderedPizzas[$i]];
+                    $pizzaArray[$i] = substr($pizzaArray[$i], 0, -1);
+                    $articleId = $pizzaIdList[$pizzaArray[$i]];
                     $sqlStatement = "INSERT INTO ordered_article (ordering_id, article_id, status) VALUES($orderId, $articleId,0)";
 
                     $this->_database->query($sqlStatement);

@@ -117,7 +117,7 @@ class Baker extends Page
         <body>
             <section>
                 <h1>Pizzabäcker (bestellte Pizzen)</h1>
-                    <form name="fortschritte[]" accept-charset="UTF-8" method="post" action="Baker.php">
+                    <form name="fortschritte[]" id="bakerForm" accept-charset="UTF-8" method="post" action="Baker.php">
                             <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
         if(count($Data) == 0){
@@ -137,32 +137,32 @@ class Baker extends Page
                                 EOT2;
             if($ProcessStatus == "0"){
                 echo <<< EOT2
-                                                <input type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0" checked/>
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio"  name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0" checked/>
                                             EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0"/>
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub" value="0"/>
                                             EOT2;
             }
             if($ProcessStatus == "1"){
                 echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="1" checked/>
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="1" checked/>
                                             EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="1" />
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="1" />
                                             EOT2;
             }
             if($ProcessStatus >= "2"){
                 echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" checked />
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName}{$OrderedArticleID}" id="blub"value="2" checked />
                                             EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" />
+                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName}{$OrderedArticleID}"id="blub" value="2" />
                                             EOT2;
             }
 
@@ -172,7 +172,6 @@ class Baker extends Page
         }
         echo <<< EOT
                         <input name="checkInput" value="true" hidden /> 
-                        <input type="submit" value="abschicken" />
                         <input type="reset" value="löschen aller" />
                     </form>
                 </section>

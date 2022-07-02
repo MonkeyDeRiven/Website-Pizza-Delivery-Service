@@ -10,13 +10,30 @@ function addPizzaToCart(name, price){
     let currentTotal = parseFloat(currentTotalArray[1]) + parseFloat(price);
     currentTotal = currentTotal.toFixed(2);
     totalPrice.innerHTML = "Gesamtpreis: " + currentTotal.toString() + " €";
+
+    enableSubmitButton();
 }
 
 function resetShoppingCart(){
+    "use strict";
     let shoppingCart = document.getElementById("shoppingCart");
     shoppingCart.innerHTML = "";
     shoppingCart.setAttribute("style", "height:" + 20 + "px");
 
     let totalPrice = document.getElementById("totalPrice");
     totalPrice.innerHTML = "Gesamtpreis: 0.00 €";
+
+    enableSubmitButton();
+}
+
+function enableSubmitButton(){
+    "use strict";
+    let submitButton = document.getElementById("submitButton");
+    let addressInputField = document.getElementById("address");
+    let shoppingCart = document.getElementById("shoppingCart");
+    if(addressInputField.value != "" &&  shoppingCart.value != "") {
+        submitButton.disabled = false;
+    }
+    else
+        submitButton.disabled = true;
 }

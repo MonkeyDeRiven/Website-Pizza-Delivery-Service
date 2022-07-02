@@ -248,7 +248,7 @@ class Bäcker extends Page
         try {
             $page = new Baker();
             $page->processReceivedData();
-            $page->generateView();
+           // $page->generateView();
         } catch (Exception $e) {
             //header("Content-type: text/plain; charset=UTF-8");
             //header("Content-type: text/html; charset=UTF-8");

@@ -95,7 +95,7 @@ abstract class Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
-                <script src="bib.js"></script>
+                <script src="PizzaShop.js"></script>
         EOT;
         if($autoreload == true){
             echo <<< EOT
