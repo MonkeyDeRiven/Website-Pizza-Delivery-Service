@@ -111,7 +111,7 @@ class Order extends Page
                         <article>
                             <h{$HCount}>$PizzaName</h{$HCount}>
                             <p>
-                                <button><img src="$PizzaPicture" height="100" width="100" /></button>
+                                <button onclick=addPizzaToCart("$PizzaName","$PizzaPrice")><img src="$PizzaPicture" height="100" width="100" /></button>
                                 {$PizzaPrice} €
                             </p>
                         </article>
@@ -123,15 +123,11 @@ class Order extends Page
                 <h{$HCount}>Warenkorb</h{$HCount}>
                 </section>
                 <form accept-charset="UTF-8" method="post" action="Order.php" id="orderFormular">
-                    <select name="Order[]" id="order" multiple>
-                        <option value="Salami">Pizza-Salami</option>
-                        <option value="Vegetaria">Pizza-Vegetaria</option>
-                        <option value="Spinat-Hühnchen">Pizza-Spinat-Hühnchen</option>
-                    </select>
-                    <p>Gesamtpreis: 0.00€</p>
+                    <textarea id="shoppingCart"></textarea>
+                    <p id="totalPrice">Gesamtpreis: 0.00 €</p>
                     <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required>
                     <button type="submit">bestellen</button>
-                    <button type="reset">löschen</button>
+                    <button type="reset" onclick="resetShoppingCart()">löschen</button>
                 </form>
                 </section>
             </body>
