@@ -1,6 +1,11 @@
 function process(jsonString){
 
     let orderArray = JSON.parse(jsonString);
+    let orderStatusSection = document.getElementById("orderStatusSection");
+
+    while(orderStatusSection.firstChild){
+        orderStatusSection.removeChild(orderStatusSection.firstChild);
+    }
 
     for(let i = 0; i<orderArray.length; i++){
         let name = orderArray[i]["name"];
@@ -9,8 +14,6 @@ function process(jsonString){
         let status = orderArray[i]["status"];
 
         let tag = document.createElement("p");
-        let orderStatusSection = document.getElementById("orderStatusSection");
-
 
         tag.innerHTML = name + ": ";
         if(status == 0){
