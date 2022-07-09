@@ -110,7 +110,7 @@ class Order extends Page
             echo <<< EOT
                         <article>
                             <h{$HCount}>$PizzaName</h{$HCount}>
-                            <p>
+                            <p id="$PizzaName">
                                 <button onclick=addPizzaToCart("$PizzaName","$PizzaPrice")><img src="$PizzaPicture" height="100" width="100" /></button>
                                 {$PizzaPrice} €
                             </p>
@@ -127,8 +127,9 @@ class Order extends Page
                     <p id="totalPrice">Gesamtpreis: 0.00 €</p>
                     <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required oninput="enableSubmitButton()">
                     <button onclick="submitOrder()" disabled="true" id="submitButton">bestellen</button>
+                    <button id="notSubmit" type="button" onclick="deleteAllSelectedOptions()" >Auswahl löschen</input>
                     <button type="reset" onclick="resetShoppingCart()" >löschen</button>
-                    <input type="button" onclick="selectAllOptions()" name="select all" />
+                   
                 </form>
                 </section>
             </body>

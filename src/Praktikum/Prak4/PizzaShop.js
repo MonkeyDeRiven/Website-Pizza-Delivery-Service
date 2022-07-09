@@ -25,11 +25,13 @@ function selectAllOptions(){
     let shoppingCart = document.getElementById("shoppingCart");
     let shoppingCartOptionsArray = shoppingCart.childNodes;
     console.log("ja");
-    for(let option in shoppingCartOptionsArray){
-        option.selected = true;
+    for(let i = 0; i<shoppingCart.length; i++){
+
+        let x = shoppingCart.options[i];
+        x.selected = true;
+        console.log(x);
     }
 }
-
 function submitOrder(){
     let form = document.forms;
     selectAllOptions();
@@ -46,6 +48,29 @@ function resetShoppingCart(){
     let totalPrice = document.getElementById("totalPrice");
     totalPrice.innerHTML = "Gesamtpreis: 0.00 €";
 
+    enableSubmitButton();
+}
+
+function deleteAllSelectedOptions(){
+    let shoppingCart = document.getElementById("shoppingCart");
+    for(let i = 0; i<shoppingCart.length; i++){
+        let option = shoppingCart.options[i];
+        if(option.selected == true){
+            let pizzaName = option.innerText;
+            let price = document.getElementById(pizzaName).innerText;
+
+            let priceArray = price.split(" ");
+
+            let totalPrice = document.getElementById("totalPrice");
+            let totalPriceString = totalPrice.innerText;
+            let currentTotalArray = totalPriceString.split(" ");
+            let currentTotal = parseFloat(currentTotalArray[1]) - parseFloat(priceArray[1]);
+            currentTotal = currentTotal.toFixed(2);
+            totalPrice.innerText = "Gesamtpreis: " + currentTotal.toString() + " €";
+            shoppingCart.removeChild(option);
+            i--;
+        }
+    }
     enableSubmitButton();
 }
 
