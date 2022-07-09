@@ -23,10 +23,11 @@ function addPizzaToCart(name, price){
 
 function selectAllOptions(){
     let shoppingCart = document.getElementById("shoppingCart");
-    let shoppingCartOptionsArray = shoppingCart.childNodes;
-    console.log("ja");
-    for(let option in shoppingCartOptionsArray){
+
+    for(let i = 0; i<shoppingCart.length; i++){
+        let option = shoppingCart.options[i];
         option.selected = true;
+        console.log(option);
     }
 }
 
@@ -35,6 +36,16 @@ function submitOrder(){
     selectAllOptions();
     form.submit();
 
+}
+
+function deleteAllSelectedOptions(){
+    let shoppingCart = document.getElementById("shoppingCart");
+    for(let i = 0; i<shoppingCart.length; i++){
+        let option = shoppingCart.options[i];
+        if(option.selected == true){
+            shoppingCart.removeChild(option);
+        }
+    }
 }
 
 function resetShoppingCart(){

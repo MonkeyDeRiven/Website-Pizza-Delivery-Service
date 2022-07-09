@@ -95,6 +95,7 @@ abstract class Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
+            <link rel="stylesheet" type="text/css" href="stylefile.css" />
                 <script src="PizzaShop.js"></script>
         EOT;
         if($autoreload == true){

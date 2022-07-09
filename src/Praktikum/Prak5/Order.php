@@ -100,36 +100,50 @@ class Order extends Page
             <body>
             <section>
                 <h1>Bestellung</h1>
+                 <span class="orderContainer">
+                    <section class="allPizzas">
         EOT;
         $HCount = 2;
+
         for($i = 0; $i < count($Data); $i+=3){
             $PizzaPicture = $Data[$i];
             $PizzaName = $Data[$i+1];
             $PizzaPrice = $Data[$i+2];
 
             echo <<< EOT
-                        <article>
-                            <h{$HCount}>$PizzaName</h{$HCount}>
-                            <p>
-                                <button onclick=addPizzaToCart("$PizzaName","$PizzaPrice")><img src="$PizzaPicture" height="100" width="100" /></button>
-                                {$PizzaPrice} €
-                            </p>
-                        </article>
+                      
+                         <div class="pizza">
+                           
+                          <button class="pizzaPictureSize" onclick=addPizzaToCart("$PizzaName","$PizzaPrice")></button>
+                          
+                          <div>
+                          <h{$HCount}>$PizzaName</h{$HCount}>  <p>{$PizzaPrice}</p>
+                          </div>
+                          </div>
+                         
+                         
+                        
                     EOT;
             $HCount++;
         }
+
         echo <<< EOT
-                <section>
+            </section>
+         
+        <section class="showCard">
+                
                 <h{$HCount}>Warenkorb</h{$HCount}>
-                </section>
                 <form accept-charset="UTF-8" method="post" action="Order.php" id="orderFormular">
                     <select id="shoppingCart" name="shoppingCart[]" multiple ></select>
                     <p id="totalPrice">Gesamtpreis: 0.00 €</p>
                     <input name="Address" type="text" id ="address" placeholder="Hier Adresse eingeben" value="" required oninput="enableSubmitButton()">
+                    
                     <button onclick="submitOrder()" disabled="true" id="submitButton">bestellen</button>
                     <button type="reset" onclick="resetShoppingCart()" >löschen</button>
-                    <input type="button" onclick="selectAllOptions()" name="select all" />
+                    <input type="button" onclick="deleteAllSelectedOptions()" id="deleteSelection">Auswahl löschen</input>
                 </form>
+                </section>
+                </span>
                 </section>
             </body>
         EOT;

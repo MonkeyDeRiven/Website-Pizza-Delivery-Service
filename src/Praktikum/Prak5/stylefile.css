@@ -1,0 +1,27 @@
+Body {background: rgb(33,136,143,.2)}
+
+.orderContainer{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.allPizzas{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.pizza{
+    display: flex;
+}
+
+.showCard{
+    margin-left: auto;
+}
+
+.pizzaPictureSize{
+    background-color: rgb(33,136,143,.2);
+    background-image: url("pizza.gif");
+    background-size: 7em 7em;
+    width: 7em;
+    height: 7em;
+}
