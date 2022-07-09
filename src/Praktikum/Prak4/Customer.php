@@ -102,7 +102,7 @@ class Customer extends Page
             <script src="StatusUpdate.js"></script>
             <section id="orderStatusSection">
                 <h1>Kunde (bestellte Pizzen)</h1>
-        
+                    <p id="orderStatusSectionP"></p>
                 </section>
                 <a href="Order.php"><button>Neue Bestellung</button></a>
                 
@@ -120,12 +120,7 @@ class Customer extends Page
      */
     protected function processReceivedData():void
     {
-        header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
-        header("Expires: Sat, 01 Jul 2000 06:00:00 GMT"); // Datum in der Vergangenheit
-        header("Cache-Control: post-check=0, pre-check=0", false); // fuer IE
-        header("Pragma: no-cache");
-        session_cache_limiter('nocache'); // VOR session_start()!
-        session_cache_expire(0);
+
         parent::processReceivedData();
         // to do: call processReceivedData() for all members
     }

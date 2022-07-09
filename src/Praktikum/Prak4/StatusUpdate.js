@@ -2,15 +2,15 @@ function process(jsonString){
 
     let orderArray = JSON.parse(jsonString);
 
+
+
     for(let i = 0; i<orderArray.length; i++){
         let name = orderArray[i]["name"];
         let articleId = orderArray[i]["ordered_article_id"];
         let orderId = orderArray[i]["ordering_id"];
         let status = orderArray[i]["status"];
-
-        let tag = document.createElement("p");
-        let orderStatusSection = document.getElementById("orderStatusSection");
-
+       // let tag = document.createElement("p");
+        let orderStatusSection = document.getElementById("orderStatusSectionP");
 
         tag.innerHTML = name + ": ";
         if(status == 0){
@@ -25,9 +25,9 @@ function process(jsonString){
         if(status == 3){
             tag.innerHTML += "unterwegs";
         }
-
         orderStatusSection.appendChild(tag);
     }
+
 }
 
 
