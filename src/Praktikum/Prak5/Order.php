@@ -98,7 +98,7 @@ class Order extends Page
         //header("Content-type: text/html");
         echo <<< EOT
             <body>
-            <section>
+            <section class="all">
                 <h1>Bestellung</h1>
                  <span class="orderContainer">
                     <section class="allPizzas">

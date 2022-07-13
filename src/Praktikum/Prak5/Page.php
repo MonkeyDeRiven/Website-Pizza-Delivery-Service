@@ -95,12 +95,16 @@ abstract class Page
         <!DOCTYPE html>
         <html lang="de">
             <head>
+           <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" type="text/css" href="stylefile.css" />
                 <script src="PizzaShop.js"></script>
+                
         EOT;
         if($autoreload == true){
             echo <<< EOT
                 <meta charset="UTF-8" http-equiv="refresh" content="5"/>
+                
+
             EOT;
         }
         else{

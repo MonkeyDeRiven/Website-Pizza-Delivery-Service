@@ -111,14 +111,12 @@ class Baker extends Page
     protected function generateView():void
     {
         $Data = $this->getViewData();
-        $this->generatePageHeader('Bäcker', "", true); //to do: set optional parameters
+        $this->generatePageHeader('Bäcker', "", false); //to do: set optional parameters
         //header("Content-type: text/html");
         echo <<< EOT
         <body>
             <section>
                 <h1>Pizzabäcker (bestellte Pizzen)</h1>
-                    <form name="fortschritte[]" id="bakerForm" accept-charset="UTF-8" method="post" action="Baker.php">
-                            <p>Bestellt/Im Ofen/Fertig</p>
         EOT;
         if(count($Data) == 0){
             echo <<< EOT
@@ -126,51 +124,77 @@ class Baker extends Page
             EOT;
 
         }
+        else {
+            echo <<< EOT
+                <form name="fortschritte[]" id="bakerForm" accept-charset="UTF-8" method="post" action="Baker.php">
+                <div class="orderStatusBaker">
+                    <p class="bakerStatusLinePizzaName"></p>
+                    <p class="orderStatusItem">Bestellt</p>
+                    <p class="orderStatusItem">Im Ofen</p>
+                    <p class="orderStatusItem">Fertig</p>
+                </div>
+                <div class="containerAllOrders">
+            EOT;
+        }
+
         for($i = 0; $i < count($Data); $i+=4){
             $PizzaName = $Data[$i];
             $OrderedArticleID = $Data[$i+1];
             $OrderingID = $Data[$i+2];
             $ProcessStatus = $Data[$i+3];
             echo <<< EOT2
-                                    <p>
-                                        {$PizzaName}{$OrderingID}
-                                EOT2;
+                    <div class="orderStatusBaker">
+                        <p class="bakerStatusLinePizzaName">{$PizzaName}{$OrderingID}</p>
+            EOT2;
             if($ProcessStatus == "0"){
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio"  name="{$PizzaName} {$OrderedArticleID}" id="blub" value="0" checked/>
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input onclick="document.forms['bakerForm'].submit();" type="radio"  name="{$PizzaName} {$OrderedArticleID}" value="0" checked/>
+                    </div>
+                EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" id="blub" value="0"/>
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" value="0"/>
+                    </div>
+                EOT2;
             }
             if($ProcessStatus == "1"){
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}"id="blub" value="1" checked/>
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input class="orderStatusItem" onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" value="1" checked/>
+                    </div>
+                EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" id="blub"value="1" />
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input class="orderStatusItem" onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" value="1" />
+                    </div>
+                EOT2;
             }
             if($ProcessStatus >= "2"){
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" id="blub"value="2" checked />
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input class="orderStatusItem" onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" value="2" checked />
+                    </div>
+                EOT2;
             }
             else{
                 echo <<< EOT2
-                                                <input onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}"id="blub" value="2" />
-                                            EOT2;
+                    <div class="orderStatusItem">
+                        <input class="orderStatusItem" onclick="document.forms['bakerForm'].submit();" type="radio" name="{$PizzaName} {$OrderedArticleID}" value="2" />
+                    </div>
+                    EOT2;
             }
 
             echo <<< EOT2
-                                        </p>
-                                        EOT2;
+                    </div>
+            EOT2;
         }
         echo <<< EOT
+                        </div>
                         <input name="checkInput" value="true" hidden />  
                         <input type="reset" value="löschen aller" />
                     </form>
@@ -191,36 +215,36 @@ class Baker extends Page
     {
         parent::processReceivedData();
 
-      /*  if(isset($_POST["checkInput"])) {
-            $totalOderSize = 0;
-            $numOfOrderedArticle = 0;
+        /*  if(isset($_POST["checkInput"])) {
+              $totalOderSize = 0;
+              $numOfOrderedArticle = 0;
 
-            //Statusänderung
-            $orderedArticleID = array();
-            $orderedArticleStatus = array();
-            $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article Where status < 2";
-            $RecordSet4 = $this->_database->query($sqlGetOrdArtID);
-            if (!$RecordSet4) throw new Exception("Error in sqlStatement: " . $this->_database->error);
-            while ($Record4 = $RecordSet4->fetch_assoc()) {
-                $orderedArticleID[] = $Record4["ordered_article_id"];
-                $orderedArticleStatus = $Record4["status"];
-                $numOfOrderedArticle++;
-            }
+              //Statusänderung
+              $orderedArticleID = array();
+              $orderedArticleStatus = array();
+              $sqlGetOrdArtID = "SELECT ordered_article_id,status FROM ordered_article Where status < 2";
+              $RecordSet4 = $this->_database->query($sqlGetOrdArtID);
+              if (!$RecordSet4) throw new Exception("Error in sqlStatement: " . $this->_database->error);
+              while ($Record4 = $RecordSet4->fetch_assoc()) {
+                  $orderedArticleID[] = $Record4["ordered_article_id"];
+                  $orderedArticleStatus = $Record4["status"];
+                  $numOfOrderedArticle++;
+              }
 
-            $allStatFromPost = array();
-            foreach($_POST as $key => $value){
-                if($value != "checkInput") {
-                    $allStatFromPost[] = $value;
-                }
-            }
+              $allStatFromPost = array();
+              foreach($_POST as $key => $value){
+                  if($value != "checkInput") {
+                      $allStatFromPost[] = $value;
+                  }
+              }
 
-            for($i = 0; $i<$numOfOrderedArticle; $i++) {
-                $sqlUpdateAllStat = "UPDATE ordered_article SET status = $allStatFromPost[$i] where ordered_article_id = $orderedArticleID[$i]";
-                $this->_database->query($sqlUpdateAllStat);
-            }
-            header('Location: Baker.php');
-            die();
-        }*/
+              for($i = 0; $i<$numOfOrderedArticle; $i++) {
+                  $sqlUpdateAllStat = "UPDATE ordered_article SET status = $allStatFromPost[$i] where ordered_article_id = $orderedArticleID[$i]";
+                  $this->_database->query($sqlUpdateAllStat);
+              }
+              header('Location: Baker.php');
+              die();
+          }*/
         // to do: call processReceivedData() for all members
         $getOrderedArticleStatus = $this->_database->prepare("SELECT ordered_article_id, status FROM ordered_article WHERE status < 2");
         $updateOrderedArticleStatus = $this->_database->prepare("UPDATE ordered_article SET status = ? WHERE ordered_article_id = ?");
@@ -242,9 +266,9 @@ class Baker extends Page
                 for($i = 0; $i <count($statusArray); $i++){
                     if($currenOrderedArticleId == $orderedArticleIdArray[$i]){
                         if($statusArray[$i] != $value){
-                           $updateOrderedArticleStatus->bind_param("ii", $value, $currenOrderedArticleId);
-                           $updateOrderedArticleStatus->execute();
-                           return;
+                            $updateOrderedArticleStatus->bind_param("ii", $value, $currenOrderedArticleId);
+                            $updateOrderedArticleStatus->execute();
+                            return;
                         }
                     }
                 }

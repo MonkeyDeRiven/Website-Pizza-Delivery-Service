@@ -159,12 +159,12 @@ class Driver extends Page
         $getPizzaNames = $this->_database->prepare("select name from ordering natural join ordered_article natural join article where ordering_id = ?");
 
         $getAllDoneOrders = "select ordering_id, ordering.address, status, " .
-                            "sum(article.price) as total, " .
-                            "sum(ordered_article.status) as totalStatus, " .
-                            "count(*) as totalItems " .
-                            "from ordering natural join ordered_article natural join article " .
-                            "group by ordering_id " .
-                            "having totalStatus/totalItems >= 2 ";
+            "sum(article.price) as total, " .
+            "sum(ordered_article.status) as totalStatus, " .
+            "count(*) as totalItems " .
+            "from ordering natural join ordered_article natural join article " .
+            "group by ordering_id " .
+            "having totalStatus/totalItems >= 2 ";
 
         $RecordSet = $this->_database->query($getAllDoneOrders);
         $Data = array();
@@ -174,7 +174,7 @@ class Driver extends Page
             $Data[] = htmlspecialchars($Record["address"]);
             $Data[] = $Record["status"];
             $Data[] = $Record["ordering_id"];
-            $Data[] = $Record["total"];
+            $Data[] = number_format((float)$Record["total"], 2, '.', '');
             $getPizzaNames->bind_param("s", $Record["ordering_id"]);
             $getPizzaNames->execute();
             $pizzaNamesRecordSet = $getPizzaNames->get_result();
@@ -206,7 +206,8 @@ class Driver extends Page
          <body>
             <section>
                 <h1>Fahrer (auslieferbare Bestellungen)</h1>
-                    <form name="lieferstatus[]" id="driverForm" accept-charset="UTF-8" method="post" action="Driver.php">
+                    <form name="driverForm[]" id="driverForm" accept-charset="UTF-8" method="post" action="Driver.php">
+        <div class="containerAllOrders">
         EOT;
         for($i = 0; $i<count($Data); $i = $i+5){
             $address = $this->_database->real_escape_string($Data[$i]);
@@ -216,27 +217,29 @@ class Driver extends Page
             $pizzaNames = $Data[$i+4];
 
             echo <<< EOT
-                <p><b>$address, $totalPrice</b></p>
-                <p>
+            <div class="containerOrderStatus">
+                <div class="orderInfo">
+                    <p>$address, $totalPrice €</p>
+                    <p>
             EOT;
             for($j = 0; $j < count($pizzaNames); $j++){
                 if($j < count($pizzaNames) - 1) {
                     echo <<< EOT
-                        $pizzaNames[$j], 
-                    EOT;
+                            $pizzaNames[$j], 
+                        EOT;
                 }
-
-                    else{
-                        echo <<< EOT
+                else{
+                    echo <<< EOT
                             $pizzaNames[$j]     
                         EOT;
-                    }
-
-
+                }
             }
             echo <<< EOT
-                </p>
-                <p>fertig/unterwegs/geliefert</p>
+                    </p>
+                </div>
+                <div class="orderStatusDriver">
+                <div class="orderStatusItem">
+                <p>fertig</p>
                 EOT;
 
             if($orderStatus == "2"){echo <<< EOT
@@ -247,6 +250,12 @@ class Driver extends Page
             EOT;
             }
 
+            echo <<< EOT
+                </div>
+                <div class="orderStatusItem">
+                <p>unterwegs</p>
+            EOT;
+
             if($orderStatus == "3"){ echo <<< EOT
                  <input onclick="document.forms['driverForm'].submit();" type="radio"  name="$orderID$orderStatus" value="$orderID,3," checked/>
             EOT;
@@ -255,6 +264,12 @@ class Driver extends Page
             EOT;
             }
 
+            echo <<< EOT
+                </div>
+                <div class="orderStatusItem">
+                <p>geliefert</p>
+            EOT;
+
             if($orderStatus == "4"){ echo <<< EOT
                  <input onclick="document.forms['driverForm'].submit();" type="radio"  name="$orderID$orderStatus" value="$orderID,4," checked/>
             EOT;
@@ -262,9 +277,15 @@ class Driver extends Page
                 <input onclick="document.forms['driverForm'].submit();" type="radio" name="$orderID$orderStatus" value="$orderID,4,"/>
             EOT;
             }
+            echo <<< EOT
+                </div>
+                </div>
+            </div>
+            EOT;
         }
 
         echo <<< EOT
+        </div>
                         <p></p>
                         <input name="checkInput" value="true" hidden />               
                         <input type="reset" value="löschen" />
