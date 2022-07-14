@@ -74,7 +74,7 @@ class Baker extends Page
         $sqlStatement = "Select article.name, ordered_article.ordered_article_id, ordering_id, status "
             . "From ordered_article join article "
             . "on article.article_id = ordered_article.article_id "
-            . "Where status < 2";
+            . "Where status < 3";
 
         $RecordSet = $this->_database->query($sqlStatement);
         if(!$RecordSet) throw new Exception("Error in sqlStatement: " . $this->_database->error);

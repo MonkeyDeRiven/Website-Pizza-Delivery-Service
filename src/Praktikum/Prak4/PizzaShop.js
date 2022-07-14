@@ -6,22 +6,23 @@ function addPizzaToCart(name, price){
 
     let newPizza = document.createElement('option');
     newPizza.optionValue = pizzaCount++;
-    newPizza.innerHTML = name;
+    newPizza.innerText = name;
     shoppingCart.appendChild(newPizza);
 
     shoppingCart.setAttribute("style", "height:" + (shoppingCart.scrollHeight) + "px");
 
     let totalPrice = document.getElementById("totalPrice");
-    let totalPriceString = totalPrice.innerHTML;
+    let totalPriceString = totalPrice.innerText;
     let currentTotalArray = totalPriceString.split(" ");
     let currentTotal = parseFloat(currentTotalArray[1]) + parseFloat(price);
     currentTotal = currentTotal.toFixed(2);
-    totalPrice.innerHTML = "Gesamtpreis: " + currentTotal.toString() + " €";
+    totalPrice.innerText = "Gesamtpreis: " + currentTotal.toString() + " €";
 
     enableSubmitButton();
 }
 
 function selectAllOptions(){
+    "use strict";
     let shoppingCart = document.getElementById("shoppingCart");
     let shoppingCartOptionsArray = shoppingCart.childNodes;
     console.log("ja");
@@ -33,6 +34,7 @@ function selectAllOptions(){
     }
 }
 function submitOrder(){
+    "use strict";
     let form = document.forms;
     selectAllOptions();
     form.submit();
@@ -42,16 +44,17 @@ function submitOrder(){
 function resetShoppingCart(){
     "use strict";
     let shoppingCart = document.getElementById("shoppingCart");
-    shoppingCart.innerHTML = "";
+    shoppingCart.innerText = "";
     shoppingCart.setAttribute("style", "height:" + 20 + "px");
 
     let totalPrice = document.getElementById("totalPrice");
-    totalPrice.innerHTML = "Gesamtpreis: 0.00 €";
+    totalPrice.innerText = "Gesamtpreis: 0.00 €";
 
     enableSubmitButton();
 }
 
 function deleteAllSelectedOptions(){
+    "use strict";
     let shoppingCart = document.getElementById("shoppingCart");
     for(let i = 0; i<shoppingCart.length; i++){
         let option = shoppingCart.options[i];
