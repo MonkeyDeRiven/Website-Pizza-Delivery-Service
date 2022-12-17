@@ -1,0 +1,96 @@
+Body {background: rgb(33,136,143,.2)}
+
+.orderContainer{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.allPizzas{
+    display: flex;
+    flex-wrap: wrap;
+    float: left;
+    margin-top: 5em;
+    margin: auto;
+}
+
+.pizza{
+    display: flex;
+}
+
+.showCard{
+    margin: auto;
+}
+
+.pizzaPictureSize{
+    background-color: rgb(33,136,143,.2);
+    background-image: url("pizza.gif");
+    background-size: 7em 7em;
+    width: 7em;
+    height: 7em;
+}
+
+body {background: rgb(33,136,143,0.2);}
+h1 {text-align: center}
+
+input[type='radio']{
+    background-color: #24246A;
+}
+
+.orderInfo {
+    font-weight: bold;
+    text-align: center;
+}
+.orderStatusDriver{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.orderStatusBaker{
+    display: flex;
+    flex-wrap: wrap;
+    background: rgb(33, 136, 143, 0.4);
+    margin-top: 1em;
+}
+
+.containerAllOrders {
+    display: flex;
+    flex-direction: column;
+}
+.containerOrderStatus {
+    display: flex;
+    flex-direction: column;
+    background: rgb(33, 136, 143, 0.4);
+    margin-top: 2em;
+}
+.orderStatusItem {
+    width: 8em;
+    text-align: center;
+    margin: auto;
+}
+
+.bakerStatusLinePizzaName{
+    width: 13em;
+}
+
+.allPizzasBaker {
+    display: flex;
+    flex-direction: column;
+}
+
+#driverForm {
+    text-align: center;
+}
+@media screen and(max-width: 1000px){
+    .showCard{
+        width: 100%;
+        margin-left: auto;
+    }
+}
+
+@media all and(max-width: 700px){
+    .orderStatusBaker, .orderStatusItem, input[type='radio']{
+        flex-direction: column;
+        background-color: #333333;
+    }
+}
